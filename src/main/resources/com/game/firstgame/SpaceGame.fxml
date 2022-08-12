@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane fx:id="scene" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="750.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.firstgame.Controller">
+   <children>
+      <ImageView fx:id="background2" fitHeight="750.0" fitWidth="539.0" layoutX="-17.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@images/Background.png" />
+         </image>
+      </ImageView>
+      <ImageView fx:id="background1" fitHeight="750.0" fitWidth="547.0" layoutX="-18.0" layoutY="-750.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@images/Background.png" />
+         </image>
+      </ImageView>
+      <ImageView fx:id="player" fitHeight="67.0" fitWidth="45.0" layoutX="228.0" layoutY="678.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@images/SpaceInvaderAnim/Space-Invaders-Ship.png" />
+         </image>
+      </ImageView>
+      <Button layoutX="228.0" layoutY="43.0" mnemonicParsing="false" text="Reset" />
+   </children>
+</AnchorPane>
