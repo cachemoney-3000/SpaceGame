@@ -4,8 +4,11 @@ import javafx.animation.*;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -15,7 +18,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
+import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 
@@ -24,14 +29,20 @@ public class Controller implements Initializable {
     private BooleanProperty aPressed = new SimpleBooleanProperty();
     private BooleanProperty sPressed = new SimpleBooleanProperty();
     private BooleanProperty dPressed = new SimpleBooleanProperty();
+    private BooleanProperty spacePressed = new SimpleBooleanProperty();
 
 
-    private BooleanBinding keyPressed = wPressed.or(aPressed).or(sPressed).or(dPressed);
+    private BooleanBinding keyPressed = wPressed.or(aPressed).or(sPressed).or(dPressed).or(spacePressed);
     private double shapeSize;
     private int movementVariable = 3;
     private int BACKGROUND_HEIGHT = 750;
     private ParallelTransition parallelTransition;
     private PlayerAnimation playerAnimation;
+    private int missileCounter = 9;
+    private int switchMissile = 0;
+    private Rectangle brick = new Rectangle();
+    private TranslateTransition transition;
+    private ArrayList<ImageView> missiles;
 
 
     @FXML
@@ -67,26 +78,25 @@ public class Controller implements Initializable {
                 player.setLayoutX(player.getLayoutX() - movementVariable);
             }
 
-            if(dPressed.get()){
+            if(dPressed.get()) {
                 player.setLayoutX(player.getLayoutX() + movementVariable);
             }
 
-
-
             squareAtBorder();
-
         }
     };
 
 
 
-    private Rectangle rectangle;
-    TranslateTransition transition;
+
 
 
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        createBricks();
+
+
         shapeSize = player.getFitHeight();
         movementSetup();
 
@@ -95,31 +105,63 @@ public class Controller implements Initializable {
         parallelTransition.play();
 
 
+
+
+        // LOAD MISSILES
+        missiles = new ArrayList<>();
+        for (int i = 0; i < 10; i++){
+            Image image = new Image("com/game/firstgame/images/SpaceInvaderAnim/Missile.png", 10, 30, false, false);
+            ImageView missile = new ImageView(image);
+            missiles.add(missile);
+        }
+
+        // SHOOTING
         transition = new TranslateTransition();
         scene.addEventFilter(KeyEvent.KEY_RELEASED, event->{
-            if (event.getCode() == KeyCode.SPACE) {
-                rectangle = new Rectangle(player.getLayoutX() + 20,player.getLayoutY()  - 20,5,20);
-                rectangle.setFill(Color.RED);
+            if (event.getCode() == KeyCode.SPACE && missileCounter >= 0) {
+                ImageView getMissile = missiles.get(missileCounter);
+
+                if (switchMissile == 0) {
+                    getMissile.setX(player.getLayoutX() + 5);
+                    switchMissile = 1;
+                } else if (switchMissile == 1) {
+                    getMissile.setX(player.getLayoutX() + 30);
+                    switchMissile = 0;
+                }
+                getMissile.setY(player.getLayoutY() - 20);
 
 
-
-
-                //Rectangle transition
-                transition.setNode(rectangle);
-                transition.setDuration(Duration.millis(125));
+                // Fire Rate
+                transition.setNode(getMissile);
+                transition.setDuration(Duration.millis(130));
                 transition.setToY(-750);
 
-                scene.getChildren().add(rectangle);
+                scene.getChildren().add(getMissile);
+
+                if (getMissile.getX() >= brick.getX() && getMissile.getX() <= brick.getX() + brick.getWidth()){
+                    System.out.println("MISSILE = " + missiles.get(missileCounter).getX());
+                    System.out.println("BRICK = " + brick.getX());
+                    System.out.println("COLLISION");
+                }
+
+                System.out.println(missileCounter);
+
+                missileCounter--;
             }
         });
 
+
+
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(2.5), e->{
             transition.play();
+
         }));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
 
 
+
+        // MOVEMENT
         keyPressed.addListener(((observableValue, aBoolean, t1) -> {
             if(!aBoolean){
                 timer.start();
@@ -130,39 +172,24 @@ public class Controller implements Initializable {
                 else {
                     playerAnimation.stopAnimation();
                 }
-
-
             } else {
                 timer.stop();
                 playerAnimation.stopAnimation();
             }
-
-
         }));
+
+
     }
 
-    /*
-    private ArrayList<Rectangle> bricks = new ArrayList<>();
+
+    // ENEMY
     public void createBricks(){
-        double width = 560;
-        double height = 200;
+        brick = new Rectangle(player.getLayoutX(),player.getLayoutY() - 200,30,30);
+        brick.setFill(Color.RED);
+        scene.getChildren().add(brick);
 
-        int spaceCheck = 1;
-
-        for (double i = height; i > 0 ; i = i - 50) {
-            for (double j = width; j > 0 ; j = j - 25) {
-                if(spaceCheck % 2 == 0){
-                    Rectangle rectangle = new Rectangle(j,i,30,30);
-                    rectangle.setFill(Color.RED);
-                    scene.getChildren().add(rectangle);
-                    bricks.add(rectangle);
-                }
-                spaceCheck++;
-            }
-        }
     }
 
-     */
 
 
     public void loopingBackground() {
@@ -200,6 +227,9 @@ public class Controller implements Initializable {
             if(e.getCode() == KeyCode.D) {
                 dPressed.set(true);
             }
+            if(e.getCode() == KeyCode.SPACE) {
+                spacePressed.set(true);
+            }
         });
 
         scene.setOnKeyReleased(e ->{
@@ -217,6 +247,9 @@ public class Controller implements Initializable {
 
             if(e.getCode() == KeyCode.D) {
                 dPressed.set(false);
+            }
+            if(e.getCode() == KeyCode.SPACE) {
+                spacePressed.set(false);
             }
         });
     }
