@@ -4,10 +4,13 @@ import javafx.animation.*;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Bounds;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -43,6 +46,7 @@ public class Controller implements Initializable {
     private Rectangle brick = new Rectangle();
     private TranslateTransition transition;
     private ArrayList<ImageView> missiles;
+    private ArrayList<TranslateTransition> translations;
 
 
     @FXML
@@ -57,9 +61,6 @@ public class Controller implements Initializable {
 
     @FXML
     private Pane root;
-
-
-
 
 
 
@@ -88,15 +89,11 @@ public class Controller implements Initializable {
 
 
 
-
-
-
+    private int counter = 0;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         createBricks();
-
-
         shapeSize = player.getFitHeight();
         movementSetup();
 
@@ -105,10 +102,9 @@ public class Controller implements Initializable {
         parallelTransition.play();
 
 
-
-
         // LOAD MISSILES
         missiles = new ArrayList<>();
+        translations = new ArrayList<>();
         for (int i = 0; i < 10; i++){
             Image image = new Image("com/game/firstgame/images/SpaceInvaderAnim/Missile.png", 10, 30, false, false);
             ImageView missile = new ImageView(image);
@@ -133,19 +129,55 @@ public class Controller implements Initializable {
 
                 // Fire Rate
                 transition.setNode(getMissile);
-                transition.setDuration(Duration.millis(130));
+                transition.setDuration(Duration.millis(135));
                 transition.setToY(-750);
+                transition.setByY(player.getLayoutY() - 20);
+
+                transition.play();
+                translations.add(transition);
 
                 scene.getChildren().add(getMissile);
 
-                if (getMissile.getX() >= brick.getX() && getMissile.getX() <= brick.getX() + brick.getWidth()){
-                    System.out.println("MISSILE = " + missiles.get(missileCounter).getX());
-                    System.out.println("BRICK = " + brick.getX());
-                    System.out.println("COLLISION");
-                }
+
 
                 System.out.println(missileCounter);
 
+                if (missileCounter < 10 && missileCounter >= 0){
+                    System.out.println("Y POSITION = " + missiles.get(missileCounter).getY());
+                    System.out.println("MISSILE = " + missiles.get(missileCounter).getX());
+                }
+
+
+                ChangeListener<Number> listener = new ChangeListener<Number>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
+                        Bounds boundsInScene = getMissile.localToScene(getMissile.getBoundsInLocal());
+                        double xInScene = boundsInScene.getMinX();
+                        double yInScene = boundsInScene.getMinY();
+
+                        //System.out.println("X = " + xInScene);
+                        //System.out.println("Y = " + yInScene);
+
+
+                        if (boundsInScene.intersects(brick.getBoundsInLocal())) {
+                            System.out.println("Y POSITION = " + missiles.get(missileCounter).getY());
+                            System.out.println("X POSITION = " + missiles.get(missileCounter).getX());
+                            System.out.println("COLLISION");
+                            System.out.println();
+                            scene.getChildren().remove(brick);
+                        }
+                    }
+                };
+                getMissile.translateXProperty().addListener(listener);
+                getMissile.translateYProperty().addListener(listener);
+
+
+                if (missiles.get(missileCounter).intersects(brick.getBoundsInLocal())){
+
+
+                }
+
+                counter++;
                 missileCounter--;
             }
         });
@@ -153,11 +185,17 @@ public class Controller implements Initializable {
 
 
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(2.5), e->{
-            transition.play();
-
         }));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
+
+        if (missileCounter == 0) {
+            timeline.stop();
+        }
+
+
+
+
 
 
 
