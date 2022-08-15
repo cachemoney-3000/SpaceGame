@@ -47,6 +47,8 @@ public class Controller implements Initializable {
     private TranslateTransition transition;
     private ArrayList<ImageView> missiles;
     private ArrayList<TranslateTransition> translations;
+    private ExplosionAnimation explosionAnimation;
+    private ImageView alien;
 
 
     @FXML
@@ -98,6 +100,7 @@ public class Controller implements Initializable {
         movementSetup();
 
         playerAnimation = new PlayerAnimation(player);
+        explosionAnimation = new ExplosionAnimation(scene, alien);
         loopingBackground();
         parallelTransition.play();
 
@@ -106,7 +109,7 @@ public class Controller implements Initializable {
         missiles = new ArrayList<>();
         translations = new ArrayList<>();
         for (int i = 0; i < 10; i++){
-            Image image = new Image("com/game/firstgame/images/SpaceInvaderAnim/Missile.png", 10, 30, false, false);
+            Image image = new Image("com/game/firstgame/images/SpaceInvaderAnim/Missile.png", 10, 30, true, false);
             ImageView missile = new ImageView(image);
             missiles.add(missile);
         }
@@ -142,15 +145,9 @@ public class Controller implements Initializable {
 
                 System.out.println(missileCounter);
 
-                if (missileCounter < 10 && missileCounter >= 0){
-                    System.out.println("Y POSITION = " + missiles.get(missileCounter).getY());
-                    System.out.println("MISSILE = " + missiles.get(missileCounter).getX());
-                }
-
-
-                ChangeListener<Number> listener = new ChangeListener<Number>() {
-                    @Override
-                    public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
+                // Check if it hit the target
+                if (missileCounter < 10 && missileCounter > 0){
+                    ChangeListener<Number> listener = (ov, oldValue, newValue) -> {
                         Bounds boundsInScene = getMissile.localToScene(getMissile.getBoundsInLocal());
                         double xInScene = boundsInScene.getMinX();
                         double yInScene = boundsInScene.getMinY();
@@ -159,25 +156,20 @@ public class Controller implements Initializable {
                         //System.out.println("Y = " + yInScene);
 
 
-                        if (boundsInScene.intersects(brick.getBoundsInLocal())) {
-                            System.out.println("Y POSITION = " + missiles.get(missileCounter).getY());
-                            System.out.println("X POSITION = " + missiles.get(missileCounter).getX());
+                        if (boundsInScene.intersects(alien.getBoundsInLocal())) {
+                            System.out.println("Y POSITION = " + xInScene);
+                            System.out.println("X POSITION = " + yInScene);
                             System.out.println("COLLISION");
                             System.out.println();
-                            scene.getChildren().remove(brick);
+
+                            explosionAnimation.startAnimation();
+                            //scene.getChildren().remove(alien);
                         }
-                    }
-                };
-                getMissile.translateXProperty().addListener(listener);
-                getMissile.translateYProperty().addListener(listener);
-
-
-                if (missiles.get(missileCounter).intersects(brick.getBoundsInLocal())){
-
-
+                    };
+                    getMissile.translateXProperty().addListener(listener);
+                    getMissile.translateYProperty().addListener(listener);
                 }
 
-                counter++;
                 missileCounter--;
             }
         });
@@ -222,9 +214,13 @@ public class Controller implements Initializable {
 
     // ENEMY
     public void createBricks(){
-        brick = new Rectangle(player.getLayoutX(),player.getLayoutY() - 200,30,30);
-        brick.setFill(Color.RED);
-        scene.getChildren().add(brick);
+        Image image = new Image("com/game/firstgame/images/Alien.png", 30, 30, true, false);
+        alien = new ImageView(image);
+        alien.setX(player.getLayoutX() - 20);
+        alien.setY(player.getLayoutY() - 200);
+
+
+        scene.getChildren().add(alien);
 
     }
 
