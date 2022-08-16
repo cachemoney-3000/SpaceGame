@@ -10,6 +10,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -18,12 +19,15 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.ResourceBundle;
 
 
@@ -41,14 +45,17 @@ public class Controller implements Initializable {
     private int BACKGROUND_HEIGHT = 750;
     private ParallelTransition parallelTransition;
     private PlayerAnimation playerAnimation;
-    private int missileCounter = 9;
+    private int missileCounter = 49;
     private int switchMissile = 0;
-    private Rectangle brick = new Rectangle();
+    private int counter = 0;
+
     private TranslateTransition transition;
     private ArrayList<ImageView> missiles;
+    private ArrayList<ImageView> enemies;
     private ArrayList<TranslateTransition> translations;
     private ExplosionAnimation explosionAnimation;
     private ImageView alien;
+    private PathTransition move;
 
 
     @FXML
@@ -91,28 +98,55 @@ public class Controller implements Initializable {
 
 
 
-    private int counter = 0;
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        createBricks();
-        shapeSize = player.getFitHeight();
-        movementSetup();
-
-        playerAnimation = new PlayerAnimation(player);
-        explosionAnimation = new ExplosionAnimation(scene, alien);
-        loopingBackground();
-        parallelTransition.play();
-
-
         // LOAD MISSILES
         missiles = new ArrayList<>();
         translations = new ArrayList<>();
-        for (int i = 0; i < 10; i++){
+        for (int i = 0; i < 50; i++){
             Image image = new Image("com/game/firstgame/images/SpaceInvaderAnim/Missile.png", 10, 30, true, false);
             ImageView missile = new ImageView(image);
             missiles.add(missile);
         }
+
+        ChangeListener<Number> enemiesListener = (ov, oldValue, newValue) -> {
+            Bounds BIS = enemies.get(0).localToScene(enemies.get(0).getBoundsInLocal());
+            double X_LOC = BIS.getMinX();
+            double Y_LOC = BIS.getMinY();
+
+            counter++;
+        };
+
+
+
+
+        // SPAWN ENEMIES
+        enemies = new ArrayList<>();
+        for (int i = 0; i < 1; i++) {
+            createBricks();
+            enemies.get(i).translateXProperty().addListener(enemiesListener);
+            enemies.get(i).translateYProperty().addListener(enemiesListener);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+        shapeSize = player.getFitHeight();
+        movementSetup();
+
+        playerAnimation = new PlayerAnimation(player);
+        loopingBackground();
+        parallelTransition.play();
+
+
 
         // SHOOTING
         transition = new TranslateTransition();
@@ -141,53 +175,43 @@ public class Controller implements Initializable {
 
                 scene.getChildren().add(getMissile);
 
-
-
                 System.out.println(missileCounter);
 
-                // Check if it hit the target
-                if (missileCounter < 10 && missileCounter > 0){
+                if (missileCounter > 0) {
                     ChangeListener<Number> listener = (ov, oldValue, newValue) -> {
                         Bounds boundsInScene = getMissile.localToScene(getMissile.getBoundsInLocal());
                         double xInScene = boundsInScene.getMinX();
                         double yInScene = boundsInScene.getMinY();
 
-                        //System.out.println("X = " + xInScene);
-                        //System.out.println("Y = " + yInScene);
+                        for (int i = 0; i < enemies.size(); i++) {
+                            if (boundsInScene.intersects(enemies.get(0).getBoundsInLocal())) {
+                                System.out.println("------------------------------------");
+                                System.out.println("ENEMY #" + i + " HIT ");
+                                System.out.println("ENEMY Y POS = " + enemies.get(i).getX());
+                                System.out.println("ENEMY X POS = " + enemies.get(i).getY());
+                                System.out.println("X POSITION = " + xInScene);
+                                System.out.println("Y POSITION = " + yInScene);
+                                System.out.println("------------------------------------");
+                                System.out.println();
 
 
-                        if (boundsInScene.intersects(alien.getBoundsInLocal())) {
-                            System.out.println("Y POSITION = " + xInScene);
-                            System.out.println("X POSITION = " + yInScene);
-                            System.out.println("COLLISION");
-                            System.out.println();
-
-                            explosionAnimation.startAnimation();
-                            //scene.getChildren().remove(alien);
+                                explosionAnimation = new ExplosionAnimation(scene, enemies.get(i));
+                                explosionAnimation.startAnimation();
+                                move.stop();
+                                enemies.remove(enemies.get(i));
+                                //scene.getChildren().remove(alien);
+                            }
                         }
+                        counter++;
                     };
                     getMissile.translateXProperty().addListener(listener);
                     getMissile.translateYProperty().addListener(listener);
                 }
 
+
                 missileCounter--;
             }
         });
-
-
-
-        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(2.5), e->{
-        }));
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
-
-        if (missileCounter == 0) {
-            timeline.stop();
-        }
-
-
-
-
 
 
 
@@ -214,14 +238,36 @@ public class Controller implements Initializable {
 
     // ENEMY
     public void createBricks(){
+        Random rand = new Random();
+
+        int num = (rand.nextInt(15 - 1) + 1) * 30;
+        System.out.println(num);
+
         Image image = new Image("com/game/firstgame/images/Alien.png", 30, 30, true, false);
         alien = new ImageView(image);
-        alien.setX(player.getLayoutX() - 20);
-        alien.setY(player.getLayoutY() - 200);
-
+        alien.setX(num);
+        alien.setY(num);
 
         scene.getChildren().add(alien);
+        move = new PathTransition();
 
+        enemies.add(alien);
+
+        Circle circle = new Circle();
+        circle.setCenterX(alien.getX());
+        circle.setLayoutY(500);
+        circle.setRadius(30);
+        move.setAutoReverse(false);
+
+        move.setNode(enemies.get(enemies.size() - 1));
+        move.setDuration(Duration.millis(2000));
+        move.setCycleCount(PathTransition.INDEFINITE);
+        move.setPath(circle);
+        move.play();
+
+
+        //move.add(transition);
+        //scene.getChildren().add(getMissile);
     }
 
 
