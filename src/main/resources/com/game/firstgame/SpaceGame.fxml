@@ -19,7 +19,7 @@
       </ImageView>
       <ImageView fx:id="player" fitHeight="67.0" fitWidth="45.0" layoutX="228.0" layoutY="678.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@images/SpaceInvaderAnim/Space-Invaders-Ship.png" />
+            <Image url="@images/SpaceInvaderAnim/Invisible/invisible_idle.png" />
          </image>
       </ImageView>
       <Button layoutX="228.0" layoutY="43.0" mnemonicParsing="false" text="Reset" />

@@ -38,9 +38,10 @@ public class Controller implements Initializable {
     private int BACKGROUND_HEIGHT = 750;
     private ParallelTransition parallelTransition;
     private PlayerAnimation playerAnimation;
+    private PlayerAnimationInvisible playerAnimationInvisible;
     private int missileCounter = 49;
     private int switchMissile = 0;
-    private int counter = 0;
+    private boolean missileFired = false;
 
     private TranslateTransition transition;
     private ArrayList<ImageView> missiles;
@@ -98,6 +99,7 @@ public class Controller implements Initializable {
         movementSetup();
 
         playerAnimation = new PlayerAnimation(player);
+        playerAnimationInvisible = new PlayerAnimationInvisible(player);
         loopingBackground();
         parallelTransition.play();
 
@@ -105,19 +107,9 @@ public class Controller implements Initializable {
         enemies = new ArrayList<>();
         enemyLocation = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            spawnEnemies(i);
+            spawnEnemies();
         }
 
-
-        /*
-        if (!enemies.isEmpty()) {
-            for (int i = 0; i < enemies.size(); i++) {
-                enemies.get(0).translateXProperty().addListener(listener);
-                enemies.get(0).translateYProperty().addListener(listener);
-            }
-        }
-
-         */
 
         missiles = new ArrayList<>();
         translations = new ArrayList<>();
@@ -199,6 +191,7 @@ public class Controller implements Initializable {
                 player.translateXProperty().addListener(listener);
                 player.translateYProperty().addListener(listener);
 
+
                 for (ImageView enemy : enemies) {
                     enemy.translateXProperty().addListener(listener);
                     enemy.translateYProperty().addListener(listener);
@@ -211,6 +204,13 @@ public class Controller implements Initializable {
 
                 missileCounter--;
                 missiles.remove(missiles.size() - 1);
+                missileFired = true;
+
+                Image changePlayer = new Image("com/game/firstgame/images/SpaceInvaderAnim/Space-Invaders-Ship.png");
+                player.setImage(changePlayer);
+                if(Boolean.FALSE.equals(sPressed.getValue())){
+                    playerAnimation.startAnimation();
+                }
             }
         });
 
@@ -221,19 +221,36 @@ public class Controller implements Initializable {
         // MOVEMENT
         keyPressed.addListener(((observableValue, aBoolean, t1) -> {
             if(!aBoolean){
-                timer.start();
-
-                if(Boolean.FALSE.equals(sPressed.getValue())){
-                    playerAnimation.startAnimation();
+                if (!missileFired) {
+                    timer.start();
+                    if(Boolean.FALSE.equals(sPressed.getValue())){
+                        playerAnimationInvisible.startAnimation();
+                    }
+                    else {
+                        playerAnimationInvisible.stopAnimation();
+                    }
                 }
                 else {
-                    playerAnimation.stopAnimation();
+                    timer.start();
+                    if(Boolean.FALSE.equals(sPressed.getValue())){
+                        playerAnimation.startAnimation();
+                    }
+                    else {
+                        playerAnimation.stopAnimation();
+                    }
                 }
+
 
 
             } else {
-                timer.stop();
-                playerAnimation.stopAnimation();
+                if (!missileFired) {
+                    timer.stop();
+                    playerAnimationInvisible.stopAnimation();
+                }
+                else {
+                    timer.stop();
+                    playerAnimation.stopAnimation();
+                }
             }
         }));
 
@@ -242,7 +259,7 @@ public class Controller implements Initializable {
 
 
     // ENEMY
-    public void spawnEnemies(int i){
+    public void spawnEnemies(){
         Random rand = new Random();
         PathTransition move = new PathTransition();
 
