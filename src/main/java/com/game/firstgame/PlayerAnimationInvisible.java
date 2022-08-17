@@ -36,9 +36,15 @@ public class PlayerAnimationInvisible {
         timeline.play();
     }
 
-    public void stopAnimation(){
+    public void playerIdle(){
         runner.setImage(new Image("com/game/firstgame/images/SpaceInvaderAnim/Invisible/invisible_idle.png"));
         number = 1;
         timeline.stop();
     }
+
+    public void stopAnimation(){
+        timeline.stop();
+    }
+
+
 }

@@ -50,6 +50,8 @@ public class Controller implements Initializable {
     private ExplosionAnimation explosionAnimation;
     private ImageView alien;
     private ArrayList<PathTransition> enemyLocation;
+    private PathTransition move;
+
 
 
     @FXML
@@ -158,6 +160,8 @@ public class Controller implements Initializable {
 
                         for (int i = 0; i < enemies.size(); i++) {
                             Bounds enemyBounds = enemies.get(i).localToScene(enemies.get(i).getBoundsInLocal());
+                            double enemyLocation_y = enemyBounds.getMaxY();
+
                             if (missileBounds.intersects(enemyBounds)) {
                                 System.out.println("------------------------------------");
                                 System.out.println("ENEMY #" + i + " HIT ");
@@ -174,8 +178,12 @@ public class Controller implements Initializable {
 
                                 enemyLocation.get(i).stop();
                                 enemyLocation.remove(enemyLocation.get(i));
-                                enemies.remove(i);
+                                enemies.remove(enemies.get(i));
                                 //scene.getChildren().remove(alien);
+                            }
+
+                            if (enemyLocation_y > 760) {
+                                System.out.println("ENEMY OUT OF BOUNDS");
                             }
 
                             if (playerBounds.intersects(enemyBounds)) {
@@ -201,16 +209,14 @@ public class Controller implements Initializable {
                 getMissile.translateXProperty().addListener(listener);
                 getMissile.translateYProperty().addListener(listener);
 
-
+                System.out.println(missileFired);
                 missileCounter--;
                 missiles.remove(missiles.size() - 1);
                 missileFired = true;
 
                 Image changePlayer = new Image("com/game/firstgame/images/SpaceInvaderAnim/Space-Invaders-Ship.png");
                 player.setImage(changePlayer);
-                if(Boolean.FALSE.equals(sPressed.getValue())){
-                    playerAnimation.startAnimation();
-                }
+
             }
         });
 
@@ -227,15 +233,17 @@ public class Controller implements Initializable {
                         playerAnimationInvisible.startAnimation();
                     }
                     else {
-                        playerAnimationInvisible.stopAnimation();
+                        playerAnimationInvisible.playerIdle();
                     }
                 }
                 else {
                     timer.start();
                     if(Boolean.FALSE.equals(sPressed.getValue())){
+                        playerAnimationInvisible.stopAnimation();
                         playerAnimation.startAnimation();
                     }
                     else {
+                        playerAnimationInvisible.stopAnimation();
                         playerAnimation.stopAnimation();
                     }
                 }
@@ -245,7 +253,7 @@ public class Controller implements Initializable {
             } else {
                 if (!missileFired) {
                     timer.stop();
-                    playerAnimationInvisible.stopAnimation();
+                    playerAnimationInvisible.playerIdle();
                 }
                 else {
                     timer.stop();
@@ -261,7 +269,7 @@ public class Controller implements Initializable {
     // ENEMY
     public void spawnEnemies(){
         Random rand = new Random();
-        PathTransition move = new PathTransition();
+        move = new PathTransition();
 
         int num = (rand.nextInt(15 - 1) + 1) * 30;
         //System.out.println(num);
@@ -285,20 +293,6 @@ public class Controller implements Initializable {
         move.setCycleCount(PathTransition.INDEFINITE);
         move.setPath(path);
 
-        /*
-        else {
-            Circle circle = new Circle();
-            circle.setCenterX(alien.getX());
-            circle.setLayoutY(rand.nextInt(650 - 300) + 300);
-            circle.setRadius(30);
-            move.setAutoReverse(false);
-
-            move.setDuration(Duration.millis(2000));
-            move.setCycleCount(PathTransition.INDEFINITE);
-            move.setPath(circle);
-        }
-
-         */
         move.play();
         enemyLocation.add(move);
 
