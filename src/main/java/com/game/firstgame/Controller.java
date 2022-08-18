@@ -51,6 +51,8 @@ public class Controller implements Initializable {
     private ImageView alien;
     private ArrayList<PathTransition> enemyLocation;
     private PathTransition move;
+    private ArrayList<Boolean> outOfBounds;
+    private Timeline timeline;
 
 
 
@@ -108,6 +110,7 @@ public class Controller implements Initializable {
 
         enemies = new ArrayList<>();
         enemyLocation = new ArrayList<>();
+        outOfBounds = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             spawnEnemies();
         }
@@ -181,20 +184,14 @@ public class Controller implements Initializable {
                                 enemies.remove(enemies.get(i));
                                 //scene.getChildren().remove(alien);
                             }
-
-                            if (enemyLocation_y > 760) {
-                                System.out.println("ENEMY OUT OF BOUNDS");
-                            }
-
-                            if (playerBounds.intersects(enemyBounds)) {
-                                System.out.println("PLAYER HIT");
-                            }
                         }
                     }
 
                     //System.out.println("MISSILE COUNTER = " + missileCounter);
                     //System.out.println("MISSILE SIZE = " +  (missiles.size() - 1));
                 };
+
+
 
                 player.translateXProperty().addListener(listener);
                 player.translateYProperty().addListener(listener);
@@ -209,7 +206,7 @@ public class Controller implements Initializable {
                 getMissile.translateXProperty().addListener(listener);
                 getMissile.translateYProperty().addListener(listener);
 
-                System.out.println(missileFired);
+                //System.out.println(missileFired);
                 missileCounter--;
                 missiles.remove(missiles.size() - 1);
                 missileFired = true;
@@ -221,6 +218,44 @@ public class Controller implements Initializable {
         });
 
 
+
+
+        ChangeListener<Number> enemyListener = (ov, oldValue, newValue) -> {
+            if (!enemies.isEmpty() && missileCounter > 0) {
+                Bounds playerBounds = player.localToScene(player.getBoundsInLocal());
+                double playerLocation_x = playerBounds.getMinX();
+                double playerLocation_y = playerBounds.getMinY();
+
+                for (int i = 0; i < enemies.size(); i++) {
+                    Bounds enemyBounds = enemies.get(i).localToScene(enemies.get(i).getBoundsInLocal());
+                    double enemyLocation_y = enemyBounds.getMaxY();
+                    double enemyLocation_x = enemyBounds.getCenterX();
+
+                    if (missileFired) {
+                        if (playerBounds.intersects(enemyBounds)) {
+                            System.out.println("PLAYER HIT");
+                        }
+
+                        if (enemyLocation_y > 760 && !outOfBounds.get(i)) {
+                            System.out.println("ENEMY OUT OF BOUNDS");
+                            spawnEnemies();
+                            outOfBounds.set(i, true);
+                        }
+                        else if (enemyLocation_y >= 0 && enemyLocation_y <= 750) {
+                            outOfBounds.set(i, false);
+                        }
+                    }
+                }
+            }
+        };
+
+        for (ImageView enemy : enemies) {
+            enemy.translateXProperty().addListener(enemyListener);
+            enemy.translateYProperty().addListener(enemyListener);
+        }
+
+        player.translateXProperty().addListener(enemyListener);
+        player.translateYProperty().addListener(enemyListener);
 
 
 
@@ -266,6 +301,8 @@ public class Controller implements Initializable {
     }
 
 
+
+
     // ENEMY
     public void spawnEnemies(){
         Random rand = new Random();
@@ -291,10 +328,21 @@ public class Controller implements Initializable {
 
         move.setDuration(Duration.seconds(10));
         move.setCycleCount(PathTransition.INDEFINITE);
+        move.setDelay(Duration.millis(200));
         move.setPath(path);
 
         move.play();
         enemyLocation.add(move);
+
+        outOfBounds.add(false);
+
+        timeline = new Timeline(
+                new KeyFrame(Duration.seconds(0), event -> move.play()),
+                new KeyFrame(Duration.seconds(2), event -> move.pause()),
+                new KeyFrame(Duration.seconds(3), event -> move.play())
+        );
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
 
         //move.add(transition);
         //scene.getChildren().add(getMissile);
