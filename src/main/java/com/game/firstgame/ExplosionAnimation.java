@@ -71,7 +71,6 @@ public class ExplosionAnimation {
     }
 
     public void stopAnimation(){
-        //runner.setImage(new Image("com/game/firstgame/images/ExplosionAnimation/tile011.png"));
         number = 1;
         timeline.stop();
     }

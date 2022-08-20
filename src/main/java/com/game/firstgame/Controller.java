@@ -33,7 +33,7 @@ public class Controller implements Initializable {
 
 
     private BooleanBinding keyPressed = wPressed.or(aPressed).or(sPressed).or(dPressed).or(spacePressed);
-    private double shapeSize;
+    private double playerSize;
     private int movementVariable = 3;
     private int BACKGROUND_HEIGHT = 750;
     private ParallelTransition parallelTransition;
@@ -50,9 +50,12 @@ public class Controller implements Initializable {
     private ExplosionAnimation explosionAnimation;
     private ImageView alien;
     private ArrayList<PathTransition> enemyLocation;
-    private PathTransition move;
     private ArrayList<Boolean> outOfBounds;
-    private Timeline timeline;
+    private ArrayList<Timeline> enemyStopping;
+    private ArrayList<ImageView> asteroids;
+    private ArrayList<PathTransition> asteroidsLocation;
+    private ArrayList<Boolean> outOfBoundsAsteroids;
+    private ArrayList<AsteroidAnimation> asteroidAnimations;
 
 
 
@@ -99,7 +102,7 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // LOAD MISSILES
-        shapeSize = player.getFitHeight();
+        playerSize = player.getFitHeight();
         movementSetup();
 
         playerAnimation = new PlayerAnimation(player);
@@ -111,8 +114,18 @@ public class Controller implements Initializable {
         enemies = new ArrayList<>();
         enemyLocation = new ArrayList<>();
         outOfBounds = new ArrayList<>();
+        enemyStopping = new ArrayList<>();
+        asteroids = new ArrayList<>();
+        asteroidsLocation = new ArrayList<>();
+        outOfBoundsAsteroids = new ArrayList<>();
+        asteroidAnimations = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             spawnEnemies();
+            spawnAsteroids();
+        }
+
+        for (int i = 0; i < 5; i++) {
+            enemyStopping.get(i).play();
         }
 
 
@@ -129,6 +142,9 @@ public class Controller implements Initializable {
         transition = new TranslateTransition();
         scene.addEventFilter(KeyEvent.KEY_RELEASED, event->{
             if (event.getCode() == KeyCode.SPACE && missileCounter >= 0) {
+                Image changePlayer = new Image("com/game/firstgame/images/Player/tile000.png");
+                player.setImage(changePlayer);
+
                 ImageView getMissile = missiles.get(missiles.size() - 1);
 
                 if (switchMissile == 0) {
@@ -185,6 +201,32 @@ public class Controller implements Initializable {
                                 //scene.getChildren().remove(alien);
                             }
                         }
+
+                        for (int i = 0; i < asteroids.size(); i++) {
+                            Bounds asteroidBounds = asteroids.get(i).localToScene(asteroids.get(i).getBoundsInLocal());
+                            double enemyLocation_y = asteroidBounds.getMaxY();
+
+                            if (missileBounds.intersects(asteroidBounds)) {
+                                System.out.println("------------------------------------");
+                                System.out.println("ASTEROID #" + i + " HIT ");
+                                System.out.println("ASTEROID Y POS = " + asteroidBounds.getMinX());
+                                System.out.println("ASTEROID X POS = " + asteroidBounds.getMinY());
+                                System.out.println("X POSITION = " + xInScene);
+                                System.out.println("Y POSITION = " + yInScene);
+                                System.out.println("------------------------------------");
+                                System.out.println();
+
+
+                                explosionAnimation = new ExplosionAnimation(scene, asteroids.get(i));
+                                explosionAnimation.startAnimation();
+
+                                asteroidAnimations.get(i).stopAnimation();
+                                asteroidsLocation.get(i).stop();
+                                asteroidsLocation.remove(asteroidsLocation.get(i));
+                                asteroids.remove(asteroids.get(i));
+                                //scene.getChildren().remove(alien);
+                            }
+                        }
                     }
 
                     //System.out.println("MISSILE COUNTER = " + missileCounter);
@@ -202,6 +244,11 @@ public class Controller implements Initializable {
                     enemy.translateYProperty().addListener(listener);
                 }
 
+                for (ImageView asteroid: asteroids) {
+                    asteroid.translateXProperty().addListener(listener);
+                    asteroid.translateYProperty().addListener(listener);
+                }
+
 
                 getMissile.translateXProperty().addListener(listener);
                 getMissile.translateYProperty().addListener(listener);
@@ -211,8 +258,7 @@ public class Controller implements Initializable {
                 missiles.remove(missiles.size() - 1);
                 missileFired = true;
 
-                Image changePlayer = new Image("com/game/firstgame/images/SpaceInvaderAnim/Space-Invaders-Ship.png");
-                player.setImage(changePlayer);
+
 
             }
         });
@@ -221,7 +267,7 @@ public class Controller implements Initializable {
 
 
         ChangeListener<Number> enemyListener = (ov, oldValue, newValue) -> {
-            if (!enemies.isEmpty() && missileCounter > 0) {
+            if (!enemies.isEmpty() && !asteroids.isEmpty())  {
                 Bounds playerBounds = player.localToScene(player.getBoundsInLocal());
                 double playerLocation_x = playerBounds.getMinX();
                 double playerLocation_y = playerBounds.getMinY();
@@ -236,7 +282,7 @@ public class Controller implements Initializable {
                             System.out.println("PLAYER HIT");
                         }
 
-                        if (enemyLocation_y > 760 && !outOfBounds.get(i)) {
+                        if (enemyLocation_y > 760 && !outOfBounds.get(i) && enemies.size() < 15) {
                             System.out.println("ENEMY OUT OF BOUNDS");
                             spawnEnemies();
                             outOfBounds.set(i, true);
@@ -246,12 +292,39 @@ public class Controller implements Initializable {
                         }
                     }
                 }
+
+                for (int i = 0; i < asteroids.size(); i++) {
+                    Bounds asteroidBounds = asteroids.get(i).localToScene(asteroids.get(i).getBoundsInLocal());
+                    double enemyLocation_y = asteroidBounds.getMaxY();
+                    double enemyLocation_x = asteroidBounds.getCenterX();
+
+                    if (missileFired) {
+                        if (playerBounds.intersects(asteroidBounds)) {
+                            System.out.println("PLAYER HIT");
+                        }
+
+                        if (enemyLocation_x < 0 && !outOfBoundsAsteroids.get(i) && asteroids.size() < 13) {
+                            System.out.println("ASTEROID OUT OF BOUNDS");
+                            spawnAsteroids();
+                            outOfBoundsAsteroids.set(i, true);
+                            System.out.println("NUMBER OF ASTEROIDS = " + asteroids.size());
+                        }
+                        else if (enemyLocation_x >= 0 && enemyLocation_x <= 500) {
+                            outOfBoundsAsteroids.set(i, false);
+                        }
+                    }
+                }
             }
         };
 
         for (ImageView enemy : enemies) {
             enemy.translateXProperty().addListener(enemyListener);
             enemy.translateYProperty().addListener(enemyListener);
+        }
+
+        for (ImageView asteroid : asteroids) {
+            asteroid.translateXProperty().addListener(enemyListener);
+            asteroid.translateYProperty().addListener(enemyListener);
         }
 
         player.translateXProperty().addListener(enemyListener);
@@ -301,20 +374,41 @@ public class Controller implements Initializable {
     }
 
 
-
-
     // ENEMY
     public void spawnEnemies(){
         Random rand = new Random();
-        move = new PathTransition();
+        PathTransition move = new PathTransition();
 
-        int num = (rand.nextInt(15 - 1) + 1) * 30;
-        //System.out.println(num);
+        int randomPosition = (rand.nextInt(15 - 1) + 1) * 30;
 
-        Image image = new Image("com/game/firstgame/images/Alien.png", 30, 30, true, false);
+        Image image = null;
+        int randomEnemies = (rand.nextInt(10 - 1) + 1);
+        if (randomEnemies == 1) {
+            image = new Image("com/game/firstgame/images/Enemies/alien.png", 30, 30, true, false);
+        } else if (randomEnemies == 2){
+            image = new Image("com/game/firstgame/images/Enemies/alien2.png", 30, 30, true, false);
+        } else if (randomEnemies == 3) {
+            image = new Image("com/game/firstgame/images/Enemies/alien3.png", 30, 30, true, false);
+        } else if (randomEnemies == 4) {
+            image = new Image("com/game/firstgame/images/Enemies/alien4.png", 30, 30, true, false);
+        } else if (randomEnemies == 5) {
+            image = new Image("com/game/firstgame/images/Enemies/alien5.png", 30, 30, true, false);
+        } else if (randomEnemies == 2){
+            image = new Image("com/game/firstgame/images/Enemies/alien6.png", 30, 30, true, false);
+        } else if (randomEnemies == 3) {
+            image = new Image("com/game/firstgame/images/Enemies/alien7.png", 30, 30, true, false);
+        } else if (randomEnemies == 4) {
+            image = new Image("com/game/firstgame/images/Enemies/alien8.png", 30, 30, true, false);
+        } else if (randomEnemies == 5) {
+            image = new Image("com/game/firstgame/images/Enemies/alien9.png", 30, 30, true, false);
+        } else {
+            image = new Image("com/game/firstgame/images/Enemies/alien10.png", 30, 30, true, false);
+        }
+
+
         alien = new ImageView(image);
-        alien.setX(num);
-        alien.setY(num);
+        alien.setX(randomPosition);
+        alien.setY(randomPosition);
 
         scene.getChildren().add(alien);
         enemies.add(alien);
@@ -326,24 +420,73 @@ public class Controller implements Initializable {
         path.getElements().add(new MoveTo(alien.getX(),-5));
         path.getElements().add(new VLineTo(760));
 
-        move.setDuration(Duration.seconds(10));
+        move.setDuration(Duration.seconds(7));
         move.setCycleCount(PathTransition.INDEFINITE);
         move.setDelay(Duration.millis(200));
         move.setPath(path);
 
-        move.play();
         enemyLocation.add(move);
-
         outOfBounds.add(false);
+        move.play();
 
-        timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0), event -> move.play()),
+        int stopRandomly = rand.nextInt((5 - 1) + 1) + 1;
+
+        // ENEMY STOPPING
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(stopRandomly), event -> move.play()),
                 new KeyFrame(Duration.seconds(2), event -> move.pause()),
                 new KeyFrame(Duration.seconds(3), event -> move.play())
         );
         timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
+        enemyStopping.add(timeline);
 
+        //move.add(transition);
+        //scene.getChildren().add(getMissile);
+    }
+
+    public void spawnAsteroids(){
+        Random rand = new Random();
+        PathTransition move = new PathTransition();
+
+        int randomNum = rand.nextInt((6 - 1) + 1) + 1;
+        int randomY = (rand.nextInt(750 - 1) + 1);
+        System.out.println(randomNum);
+
+        Image image = new Image("com/game/firstgame/images/Asteroids/tile000.png", 20, 20, true, true);
+
+        ImageView asteroid = new ImageView(image);
+
+
+        AsteroidAnimation asteroidAnimation = new AsteroidAnimation(scene, asteroid, randomNum);
+        asteroidAnimation.startAnimation();
+
+        scene.getChildren().add(asteroid);
+        asteroids.add(asteroid);
+
+        move.setNode(asteroids.get(asteroids.size() - 1));
+
+        Path path = new Path();
+
+        if (randomNum % 2 == 0) {
+            path.getElements().add(new MoveTo(-20, randomY));
+            path.getElements().add(new HLineTo(520));
+        } else {
+            path.getElements().add(new MoveTo(520,randomY));
+            path.getElements().add(new HLineTo(-20));
+        }
+
+
+
+        move.setDuration(Duration.seconds(4));
+        move.setCycleCount(PathTransition.INDEFINITE);
+        move.setPath(path);
+
+        asteroidsLocation.add(move);
+        outOfBoundsAsteroids.add(false);
+
+        asteroidAnimations.add(asteroidAnimation);
+
+        move.play();
         //move.add(transition);
         //scene.getChildren().add(getMissile);
     }
@@ -414,8 +557,8 @@ public class Controller implements Initializable {
 
     public void squareAtBorder() {
         double leftBound = 0;
-        double rightBound = scene.getWidth() - shapeSize;
-        double bottomBound = scene.getHeight() - shapeSize;
+        double rightBound = scene.getWidth() - playerSize  + 52;
+        double bottomBound = scene.getHeight() - playerSize + 30;
         double topBound = 0;
 
 

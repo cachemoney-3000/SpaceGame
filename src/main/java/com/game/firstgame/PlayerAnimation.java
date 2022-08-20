@@ -15,14 +15,14 @@ public class PlayerAnimation {
 
     Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.1), event -> {
         if(number == 1){
-            runner.setImage(new Image("com/game/firstgame/images/SpaceInvaderAnim/Space-Invaders-Ship-fire-1.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Player/tile001.png"));
             number = 2;
         } else if( number == 2){
-            runner.setImage(new Image("com/game/firstgame/images/SpaceInvaderAnim/Space-Invaders-Ship-fire-2.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Player/tile002.png"));
             number = 3;
         }
         else {
-            runner.setImage(new Image("com/game/firstgame/images/SpaceInvaderAnim/Space-Invaders-Ship-fire-3.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Player/tile003.png"));
             number = 1;
         }
     }));
@@ -37,7 +37,7 @@ public class PlayerAnimation {
     }
 
     public void stopAnimation(){
-        runner.setImage(new Image("com/game/firstgame/images/SpaceInvaderAnim/Space-Invaders-Ship.png"));
+        runner.setImage(new Image("com/game/firstgame/images/Player/tile000.png"));
         number = 1;
         timeline.stop();
     }

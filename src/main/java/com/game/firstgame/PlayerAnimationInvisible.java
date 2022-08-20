@@ -15,14 +15,14 @@ public class PlayerAnimationInvisible {
 
     Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.1), event -> {
         if(number == 1){
-            runner.setImage(new Image("com/game/firstgame/images/SpaceInvaderAnim/Invisible/invisible_move1.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Player/invisible/inv2.png"));
             number = 2;
         } else if( number == 2){
-            runner.setImage(new Image("com/game/firstgame/images/SpaceInvaderAnim/Invisible/invisible_move2.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Player/invisible/inv3.png"));
             number = 3;
         }
         else {
-            runner.setImage(new Image("com/game/firstgame/images/SpaceInvaderAnim/Invisible/invisible_move3.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Player/invisible/inv4.png"));
             number = 1;
         }
     }));
@@ -37,7 +37,7 @@ public class PlayerAnimationInvisible {
     }
 
     public void playerIdle(){
-        runner.setImage(new Image("com/game/firstgame/images/SpaceInvaderAnim/Invisible/invisible_idle.png"));
+        runner.setImage(new Image("com/game/firstgame/images/Player/invisible/inv1.png"));
         number = 1;
         timeline.stop();
     }
