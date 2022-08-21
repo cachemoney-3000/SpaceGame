@@ -13,6 +13,7 @@ public class SpaceGame extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(SpaceGame.class.getResource("SpaceGame.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 500, 750);
         stage.setTitle("Hello!");
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
 
