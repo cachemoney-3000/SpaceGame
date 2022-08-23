@@ -63,7 +63,7 @@ public class Asteroids {
 
 
         move.setDuration(Duration.seconds(4));
-        move.setCycleCount(PathTransition.INDEFINITE);
+        //move.setCycleCount(PathTransition.INDEFINITE);
         move.setPath(path);
 
         asteroidsLocation.add(move);

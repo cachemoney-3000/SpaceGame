@@ -14,7 +14,6 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.List;
 import java.util.Random;
 
 public class Enemy {
@@ -76,11 +75,11 @@ public class Enemy {
 
         alien.setY(-20);
         Path path = new Path();
-        path.getElements().add(new MoveTo(alien.getX(),-20));
+        path.getElements().add(new MoveTo(alien.getX(),-50));
         path.getElements().add(new VLineTo(760));
 
         move.setDuration(Duration.seconds(7));
-        move.setCycleCount(PathTransition.INDEFINITE);
+        //move.setCycleCount(PathTransition.INDEFINITE);
         move.setDelay(Duration.millis(200));
         move.setPath(path);
 

@@ -136,7 +136,14 @@ public class Controller implements Initializable {
                         }
                         // If an alien went past the screen, spawn new enemy
                         if (Boolean.TRUE.equals(alienLocationMaxY > 760 && !outOfBounds.get(i)) && enemies.size() < 15) {
+                            enemyLocation.get(i).stop();
+                            enemyLocation.remove(enemyLocation.get(i));
+
+                            scene.getChildren().remove(enemies.get(i));
+                            enemies.remove(enemies.get(i));
+
                             enemy.spawnEnemies();
+
                             outOfBounds.set(i, true);
                         }
                         // Alien is in the screen
@@ -159,8 +166,11 @@ public class Controller implements Initializable {
                         if (Boolean.TRUE.equals(asteroidLocationCenterX < 0 && !outOfBoundsAsteroids.get(i)) && asteroids.size() < 8) {
                             System.out.println("SPAWN MORE, asteroid size = " + asteroids.size());
                             asteroidAnimations.get(i).stopAnimation();
+                            asteroidAnimations.remove(asteroidAnimations.get(i));
+
                             asteroidsLocation.get(i).stop();
                             asteroidsLocation.remove(asteroidsLocation.get(i));
+
                             scene.getChildren().remove(asteroids.get(i));
                             asteroids.remove(asteroids.get(i));
 
@@ -318,8 +328,11 @@ public class Controller implements Initializable {
 
                                 // Remove the asteroid
                                 asteroidAnimations.get(i).stopAnimation();
+                                asteroidAnimations.remove(asteroidAnimations.get(i));
+
                                 asteroidsLocation.get(i).stop();
                                 asteroidsLocation.remove(asteroidsLocation.get(i));
+
                                 asteroids.remove(asteroids.get(i));
                             }
                         }
