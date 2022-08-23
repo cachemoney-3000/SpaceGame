@@ -24,32 +24,32 @@ public class AsteroidAnimation {
             // SET THE LOCATION OF EXPLOSION
             runner.setX(runner.getX() - 20);
             runner.setY(runner.getY() - 20);
-            runner.setImage(new Image("com/game/firstgame/images/Asteroids/tile000.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Asteroids1/tile000.png"));
             number = 2;
         } else if (number == 2) {
-            runner.setImage(new Image("com/game/firstgame/images/Asteroids/tile001.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Asteroids1/tile001.png"));
             number = 3;
         } else if (number == 3) {
-            runner.setImage(new Image("com/game/firstgame/images/Asteroids/tile002.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Asteroids1/tile002.png"));
             number = 4;
         } else if (number == 4) {
-            runner.setImage(new Image("com/game/firstgame/images/Asteroids/tile003.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Asteroids1/tile003.png"));
             number = 5;
         } else if (number == 5) {
-            runner.setImage(new Image("com/game/firstgame/images/Asteroids/tile004.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Asteroids1/tile004.png"));
             number = 6;
         } else if (number == 6) {
-            runner.setImage(new Image("com/game/firstgame/images/Asteroids/tile005.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Asteroids1/tile005.png"));
             number = 7;
         } else if (number == 7) {
-            runner.setImage(new Image("com/game/firstgame/images/Asteroids/tile006.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Asteroids1/tile006.png"));
             number = 8;
         } else if (number == 8) {
-            runner.setImage(new Image("com/game/firstgame/images/Asteroids/tile007.png"));
+            runner.setImage(new Image("com/game/firstgame/images/Asteroids1/tile007.png"));
             number = 9;
         } else if (number == 9) {
-            runner.setImage(new Image("com/game/firstgame/images/Asteroids/tile008.png"));
-            number = 10;
+            runner.setImage(new Image("com/game/firstgame/images/Asteroids1/tile008.png"));
+            number = 1;
         } else if (number == 10) {
             runner.setImage(new Image("com/game/firstgame/images/Asteroids/tile009.png"));
             number = 11;
@@ -120,6 +120,8 @@ public class AsteroidAnimation {
         this.runner = runner;
         this.scene = scene;
         this.number = animationNumber;
+        this.runner.setFitHeight(70);
+        this.runner.setFitWidth(70);
         timeline.setCycleCount(Animation.INDEFINITE);
     }
 
