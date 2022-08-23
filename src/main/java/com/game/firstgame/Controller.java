@@ -53,9 +53,10 @@ public class Controller implements Initializable {
     private ArrayList<Boolean> outOfBoundsAsteroids;
     private ArrayList<AsteroidAnimation> asteroidAnimations;
     private int addEnemy = 3;
+    private int addAsteroid = 4;
     private PlayerMovement playerMovement;
     private Enemy enemy;
-    private Asteroids asteroids1;
+    private Asteroids asteroidBelt;
 
 
 
@@ -113,16 +114,16 @@ public class Controller implements Initializable {
 
         // Initialize the enemies
         enemy = new Enemy(alien, scene);
-        asteroids1 = new Asteroids(scene);
+        asteroidBelt = new Asteroids(scene);
 
         // Constantly check if the player was hit by an alien or asteroid
         ChangeListener<Number> enemyListener = (ov, oldValue, newValue) -> {
-            if (!enemies.isEmpty() && !asteroids.isEmpty())  {
-                Bounds playerBounds = player.localToScene(player.getBoundsInLocal());
-                double playerLocation_x = playerBounds.getMinX();
-                double playerLocation_y = playerBounds.getMaxY() - 38;
+            Bounds playerBounds = player.localToScene(player.getBoundsInLocal());
+            double playerLocation_x = playerBounds.getMinX();
+            double playerLocation_y = playerBounds.getMaxY() - 38;
 
-                if (missileFired) {
+            if (!enemies.isEmpty())  {
+                if (true) {
                     // Check every alien
                     for (int i = 0; i < enemies.size(); i++) {
                         Bounds enemyBounds = enemies.get(i).localToScene(enemies.get(i).getBoundsInLocal());
@@ -131,56 +132,25 @@ public class Controller implements Initializable {
                         double enemyLocation_x = enemyBounds.getCenterX();
 
                         // Check if the player was hit by an alien
-                        if (playerBounds.intersects(enemyBounds) && playerLocation_y > alienLocationMinY) {
-                            //System.out.println("PLAYER HIT");
+                        if (playerBounds.intersects(enemyBounds) && playerLocation_y > alienLocationMinY && missileFired) {
+                            System.out.println("PLAYER HIT BY ALIEN");
                         }
                         // If an alien went past the screen, spawn new enemy
-                        if (Boolean.TRUE.equals(alienLocationMaxY > 760 && !outOfBounds.get(i)) && enemies.size() < 15) {
+                        if (Boolean.TRUE.equals(alienLocationMaxY > 760)) {
                             enemyLocation.get(i).stop();
                             enemyLocation.remove(enemyLocation.get(i));
 
                             scene.getChildren().remove(enemies.get(i));
                             enemies.remove(enemies.get(i));
 
-                            enemy.spawnEnemies();
+                            if (enemies.size() < 15)
+                                enemy.spawnEnemies();
 
-                            outOfBounds.set(i, true);
+
                         }
                         // Alien is in the screen
-                        else if (alienLocationMaxY >= 0 && alienLocationMaxY <= 750) {
-                            outOfBounds.set(i, false);
-                        }
-                    }
-
-                    //Check every asteroid
-                    for (int i = 0; i < asteroids.size(); i++) {
-                        Bounds asteroidBounds = asteroids.get(i).localToScene(asteroids.get(i).getBoundsInLocal());
-                        double asteroidLocationMinY = asteroidBounds.getMinY() + 10;
-                        double asteroidLocationCenterX = asteroidBounds.getCenterX();
-
-                        // Check if the asteroid hits the player
-                        if (playerBounds.intersects(asteroidBounds) && playerLocation_y > asteroidLocationMinY) {
-                            //wSystem.out.println("PLAYER HIT");
-                        }
-                        // If the asteroid went past the screen, spawn new asteroids in a different location
-                        if (Boolean.TRUE.equals(asteroidLocationCenterX < 0 && !outOfBoundsAsteroids.get(i)) && asteroids.size() < 8) {
-                            System.out.println("SPAWN MORE, asteroid size = " + asteroids.size());
-                            asteroidAnimations.get(i).stopAnimation();
-                            asteroidAnimations.remove(asteroidAnimations.get(i));
-
-                            asteroidsLocation.get(i).stop();
-                            asteroidsLocation.remove(asteroidsLocation.get(i));
-
-                            scene.getChildren().remove(asteroids.get(i));
-                            asteroids.remove(asteroids.get(i));
-
-                            asteroids1.spawnAsteroids();
-                            outOfBoundsAsteroids.set(i, true);
-                            //System.out.println("NUMBER OF ASTEROIDS = " + asteroids.size());
-                        }
-                        // Asteroid is in the screen
-                        else if (asteroidLocationCenterX >= 0 && asteroidLocationCenterX <= 500) {
-                            outOfBoundsAsteroids.set(i, false);
+                        else if (alienLocationMaxY >= 0 && alienLocationMaxY <= 760) {
+                            //outOfBounds.set(i, false);
                         }
                     }
                 }
@@ -190,10 +160,61 @@ public class Controller implements Initializable {
             else {
                 System.out.println("No more enemies, spawned " + addEnemy + " more");
                 for (int i = 0; i < addEnemy; i++){
-                    enemy.spawnEnemies();
-                    asteroids1.spawnAsteroids();
+                    asteroidBelt.spawnAsteroids();
                 }
                 addEnemy++;
+            }
+
+            if (!asteroids.isEmpty()) {
+                //Check every asteroid
+                for (int i = 0; i < asteroids.size(); i++) {
+                    Bounds asteroidBounds = asteroids.get(i).localToScene(asteroids.get(i).getBoundsInLocal());
+                    double asteroidLocationMinY = asteroidBounds.getMinY() + 10;
+                    double asteroidLocationCenterX = asteroidBounds.getCenterX();
+
+                    // Check if the asteroid hits the player
+                    if (playerBounds.intersects(asteroidBounds) && playerLocation_y > asteroidLocationMinY && missileFired) {
+                        System.out.println("PLAYER HIT BY ASTEROID");
+                    }
+
+
+
+                    // If the asteroid went past the screen, spawn new asteroids in a different location
+                    if (Boolean.TRUE.equals(asteroidLocationCenterX < -20 || asteroidLocationCenterX > 510)) {
+
+                        asteroidsLocation.get(i).stop();
+                        asteroidsLocation.remove(asteroidsLocation.get(i));
+
+                        asteroidAnimations.get(i).stopAnimation();
+                        asteroidAnimations.remove(asteroidAnimations.get(i));
+
+                        scene.getChildren().remove(asteroids.get(i));
+                        asteroids.remove(asteroids.get(i));
+
+                        if (asteroids.size() <= 8) {
+                            System.out.println("SPAWN MORE, asteroid size = " + asteroids.size());
+                            asteroidBelt.spawnAsteroids();
+                        }
+
+                        //asteroidBelt.spawnAsteroids();
+                        //outOfBoundsAsteroids.set(i, true);
+                        //outOfBoundsAsteroids.remove(outOfBoundsAsteroids.get(i));
+                        //System.out.println("NUMBER OF ASTEROIDS = " + asteroids.size());
+                    }
+                    // Asteroid is in the screen
+                    else if (asteroidLocationCenterX > 0 && asteroidLocationCenterX < 500) {
+                        //outOfBoundsAsteroids.set(i, false);
+                    }
+                }
+            }
+
+            // If there are no more enemies, spawn more
+            else {
+                System.out.println("No more asteroids, spawned " + addAsteroid + " more");
+                for (int i = 0; i < addAsteroid; i++){
+                    asteroidBelt.spawnAsteroids();
+                }
+                addAsteroid++;
             }
         };
 
@@ -225,7 +246,7 @@ public class Controller implements Initializable {
                 new KeyFrame(Duration.seconds(5), event -> {
                     if (asteroids.size() <= 8) {
                         System.out.println(asteroids.size());
-                        asteroids1.spawnAsteroids();
+                        asteroidBelt.spawnAsteroids();
 
                         for (ImageView asteroid: asteroids) {
                             asteroid.translateXProperty().addListener(enemyListener);
@@ -237,10 +258,10 @@ public class Controller implements Initializable {
         spawnAsteroidsTimeline.setCycleCount(Animation.INDEFINITE);
         spawnAsteroidsTimeline.play();
 
-        asteroids = asteroids1.getAsteroids();
-        asteroidsLocation = asteroids1.getAsteroidsLocation();
-        outOfBoundsAsteroids = asteroids1.getOutOfBoundsAsteroids();
-        asteroidAnimations = asteroids1.getAsteroidAnimations();
+        asteroids = asteroidBelt.getAsteroids();
+        asteroidsLocation = asteroidBelt.getAsteroidsLocation();
+        outOfBoundsAsteroids = asteroidBelt.getOutOfBoundsAsteroids();
+        asteroidAnimations = asteroidBelt.getAsteroidAnimations();
 
 
 

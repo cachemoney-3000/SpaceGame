@@ -36,7 +36,7 @@ public class Asteroids {
         int randomY = (rand.nextInt(750 - 1) + 1);
         //System.out.println(randomNum);
 
-        Image image = new Image("com/game/firstgame/images/Asteroids/tile000.png", 20, 20, true, true);
+        Image image = new Image("com/game/firstgame/images/Asteroids1/tile000.png", 20, 20, true, true);
 
         ImageView asteroid = new ImageView(image);
 
@@ -52,11 +52,12 @@ public class Asteroids {
         Path path = new Path();
 
         int coinFlip = rand.nextInt((2 - 1) + 1) + 1;
+        System.out.println("Coin = " + coinFlip);
         if (coinFlip % 2 == 0) {
             path.getElements().add(new MoveTo(-20, randomY));
             path.getElements().add(new HLineTo(520));
         } else {
-            path.getElements().add(new MoveTo(520,randomY));
+            path.getElements().add(new MoveTo(500,randomY));
             path.getElements().add(new HLineTo(-20));
         }
 

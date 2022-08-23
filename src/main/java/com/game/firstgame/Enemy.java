@@ -75,7 +75,7 @@ public class Enemy {
 
         alien.setY(-20);
         Path path = new Path();
-        path.getElements().add(new MoveTo(alien.getX(),-50));
+        path.getElements().add(new MoveTo(alien.getX(),0));
         path.getElements().add(new VLineTo(760));
 
         move.setDuration(Duration.seconds(7));
