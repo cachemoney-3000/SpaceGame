@@ -58,6 +58,10 @@ public class Controller implements Initializable {
     private Enemy enemy;
     private Asteroids asteroidBelt;
 
+    private ArrayList<ImageView> missileBoxes;
+    private ArrayList<PathTransition> missileBoxLocation;
+    private ArrayList<PowerUpAnimation> powerUpAnimations;
+
 
 
     @FXML
@@ -218,7 +222,7 @@ public class Controller implements Initializable {
             }
         };
 
-
+        // Spawn aliens every 8 seconds
         Timeline spawnAlienTimeline = new Timeline(
                 new KeyFrame(Duration.seconds(8), event -> {
                     if (enemies.size() <= 15) {
@@ -240,8 +244,7 @@ public class Controller implements Initializable {
         outOfBounds = enemy.getOutOfBounds();
         enemyStopping = enemy.getEnemyStopping();
 
-        // Initialize the asteroids
-
+        // Initialize the asteroids and spawn asteroids every 5 seconds
         Timeline spawnAsteroidsTimeline = new Timeline(
                 new KeyFrame(Duration.seconds(5), event -> {
                     if (asteroids.size() <= 8) {
@@ -257,11 +260,25 @@ public class Controller implements Initializable {
         );
         spawnAsteroidsTimeline.setCycleCount(Animation.INDEFINITE);
         spawnAsteroidsTimeline.play();
-
         asteroids = asteroidBelt.getAsteroids();
         asteroidsLocation = asteroidBelt.getAsteroidsLocation();
         outOfBoundsAsteroids = asteroidBelt.getOutOfBoundsAsteroids();
         asteroidAnimations = asteroidBelt.getAsteroidAnimations();
+
+        missileBoxes = new ArrayList<>();
+        missileBoxLocation = new ArrayList<>();
+        powerUpAnimations = new ArrayList<>();
+        Timeline spawnMissileTimeline = new Timeline(
+                new KeyFrame(Duration.seconds(2), event -> {
+                    if (missileFired) {
+                        System.out.println("Spawned missile box");
+                        spawnMissiles();
+                    }
+                })
+        );
+        spawnMissileTimeline.setCycleCount(Animation.INDEFINITE);
+        spawnMissileTimeline.play();
+
 
 
 
@@ -406,10 +423,41 @@ public class Controller implements Initializable {
                 }
             }
         }));
-
-
     }
 
+
+    private void spawnMissiles() {
+        Random rand = new Random();
+        PathTransition move = new PathTransition();
+
+        int randomPosition = (rand.nextInt(15 - 1) + 1) * 30;
+
+        Image image = new Image("com/game/firstgame/images/Powerup/powerup01_1.png", 20, 20, true, true);
+        ImageView missileBox = new ImageView(image);
+        missileBox.setY(-20);
+        missileBox.setX(randomPosition);
+
+        PowerUpAnimation powerUpAnimation = new PowerUpAnimation(scene, missileBox);
+        powerUpAnimation.startAnimation();
+
+        scene.getChildren().add(missileBox);
+        missileBoxes.add(missileBox);
+
+        move.setNode(missileBoxes.get(missileBoxes.size() - 1));
+
+        Path path = new Path();
+        path.getElements().add(new MoveTo(missileBox.getX(),0));
+        path.getElements().add(new VLineTo(760));
+
+        move.setDuration(Duration.seconds(8));
+        //move.setCycleCount(PathTransition.INDEFINITE);
+        move.setPath(path);
+
+        missileBoxLocation.add(move);
+        powerUpAnimations.add(powerUpAnimation);
+
+        move.play();
+    }
     private void addListener(ImageView getMissile, ChangeListener<Number> missileListener) {
         for (ImageView asteroid: asteroids) {
             asteroid.translateXProperty().addListener(missileListener);
