@@ -35,7 +35,7 @@ public class Controller implements Initializable {
     private int movementVariable = 3;
     private PlayerAnimation playerAnimation;
     private PlayerAnimationInvisible playerAnimationInvisible;
-    private int missileCounter = 49;
+    private int missileCounter = 4;
     private int switchMissile = 0;
     private boolean missileFired = false;
 
@@ -125,9 +125,8 @@ public class Controller implements Initializable {
             Bounds playerBounds = player.localToScene(player.getBoundsInLocal());
             double playerLocation_x = playerBounds.getMinX();
             double playerLocation_y = playerBounds.getMaxY() - 38;
-
-            if (!enemies.isEmpty())  {
-                if (true) {
+            if (missileFired) {
+                if (!enemies.isEmpty())  {
                     // Check every alien
                     for (int i = 0; i < enemies.size(); i++) {
                         Bounds enemyBounds = enemies.get(i).localToScene(enemies.get(i).getBoundsInLocal());
@@ -136,7 +135,7 @@ public class Controller implements Initializable {
                         double enemyLocation_x = enemyBounds.getCenterX();
 
                         // Check if the player was hit by an alien
-                        if (playerBounds.intersects(enemyBounds) && playerLocation_y > alienLocationMinY && missileFired) {
+                        if (playerBounds.intersects(enemyBounds) && playerLocation_y > alienLocationMinY) {
                             System.out.println("PLAYER HIT BY ALIEN");
                         }
                         // If an alien went past the screen, spawn new enemy
@@ -158,67 +157,101 @@ public class Controller implements Initializable {
                         }
                     }
                 }
-            }
 
-            // If there are no more enemies, spawn more
-            else {
-                System.out.println("No more enemies, spawned " + addEnemy + " more");
-                for (int i = 0; i < addEnemy; i++){
-                    asteroidBelt.spawnAsteroids();
-                }
-                addEnemy++;
-            }
-
-            if (!asteroids.isEmpty()) {
-                //Check every asteroid
-                for (int i = 0; i < asteroids.size(); i++) {
-                    Bounds asteroidBounds = asteroids.get(i).localToScene(asteroids.get(i).getBoundsInLocal());
-                    double asteroidLocationMinY = asteroidBounds.getMinY() + 10;
-                    double asteroidLocationCenterX = asteroidBounds.getCenterX();
-
-                    // Check if the asteroid hits the player
-                    if (playerBounds.intersects(asteroidBounds) && playerLocation_y > asteroidLocationMinY && missileFired) {
-                        System.out.println("PLAYER HIT BY ASTEROID");
+                // If there are no more enemies, spawn more
+                else {
+                    System.out.println("No more enemies, spawned " + addEnemy + " more");
+                    for (int i = 0; i < addEnemy; i++){
+                        enemy.spawnEnemies();
                     }
+                    addEnemy++;
+                }
 
+                if (!asteroids.isEmpty()) {
+                    //Check every asteroid
+                    for (int i = 0; i < asteroids.size(); i++) {
+                        Bounds asteroidBounds = asteroids.get(i).localToScene(asteroids.get(i).getBoundsInLocal());
+                        double asteroidLocationMinY = asteroidBounds.getMinY() + 10;
+                        double asteroidLocationCenterX = asteroidBounds.getCenterX();
 
-
-                    // If the asteroid went past the screen, spawn new asteroids in a different location
-                    if (Boolean.TRUE.equals(asteroidLocationCenterX < -20 || asteroidLocationCenterX > 510)) {
-
-                        asteroidsLocation.get(i).stop();
-                        asteroidsLocation.remove(asteroidsLocation.get(i));
-
-                        asteroidAnimations.get(i).stopAnimation();
-                        asteroidAnimations.remove(asteroidAnimations.get(i));
-
-                        scene.getChildren().remove(asteroids.get(i));
-                        asteroids.remove(asteroids.get(i));
-
-                        if (asteroids.size() <= 8) {
-                            System.out.println("SPAWN MORE, asteroid size = " + asteroids.size());
-                            asteroidBelt.spawnAsteroids();
+                        // Check if the asteroid hits the player
+                        if (playerBounds.intersects(asteroidBounds) && playerLocation_y > asteroidLocationMinY && missileFired) {
+                            System.out.println("PLAYER HIT BY ASTEROID");
                         }
 
-                        //asteroidBelt.spawnAsteroids();
-                        //outOfBoundsAsteroids.set(i, true);
-                        //outOfBoundsAsteroids.remove(outOfBoundsAsteroids.get(i));
-                        //System.out.println("NUMBER OF ASTEROIDS = " + asteroids.size());
-                    }
-                    // Asteroid is in the screen
-                    else if (asteroidLocationCenterX > 0 && asteroidLocationCenterX < 500) {
-                        //outOfBoundsAsteroids.set(i, false);
-                    }
-                }
-            }
 
-            // If there are no more enemies, spawn more
-            else {
-                System.out.println("No more asteroids, spawned " + addAsteroid + " more");
-                for (int i = 0; i < addAsteroid; i++){
-                    asteroidBelt.spawnAsteroids();
+
+                        // If the asteroid went past the screen, spawn new asteroids in a different location
+                        if (Boolean.TRUE.equals(asteroidLocationCenterX < -20 || asteroidLocationCenterX > 510)) {
+
+                            asteroidsLocation.get(i).stop();
+                            asteroidsLocation.remove(asteroidsLocation.get(i));
+
+                            asteroidAnimations.get(i).stopAnimation();
+                            asteroidAnimations.remove(asteroidAnimations.get(i));
+
+                            scene.getChildren().remove(asteroids.get(i));
+                            asteroids.remove(asteroids.get(i));
+
+                            if (asteroids.size() <= 8) {
+                                System.out.println("SPAWN MORE, asteroid size = " + asteroids.size());
+                                asteroidBelt.spawnAsteroids();
+                            }
+
+                        }
+                        // Asteroid is in the screen
+                        else if (asteroidLocationCenterX > 0 && asteroidLocationCenterX < 500) {
+                            //outOfBoundsAsteroids.set(i, false);
+                        }
+                    }
                 }
-                addAsteroid++;
+                // If there are no more enemies, spawn more
+                else {
+                    System.out.println("No more asteroids, spawned " + addAsteroid + " more");
+                    System.out.println(asteroids.size());
+                    for (int i = 0; i < addAsteroid; i++){
+                        asteroidBelt.spawnAsteroids();
+                    }
+                    addAsteroid++;
+                }
+
+                if (!missileBoxes.isEmpty()) {
+                    //Check every asteroid
+                    for (int i = 0; i < missileBoxes.size(); i++) {
+                        Bounds missileBoxesBounds = missileBoxes.get(i).localToScene(missileBoxes.get(i).getBoundsInLocal());
+                        double missileBoxLocationMinY = missileBoxesBounds.getMinY() + 10;
+                        double missileBoxLocationCenterX = missileBoxesBounds.getCenterX();
+                        double missileBoxLocationMaxY = missileBoxesBounds.getMaxY();
+
+                        // Check if the powerUp hits the player
+                        if (playerBounds.intersects(missileBoxesBounds) && playerLocation_y > missileBoxLocationMinY) {
+                            System.out.println("PLAYER HIT BY THE POWERUP");
+                            missileCounter += 10;
+
+                            missileBoxLocation.get(i).stop();
+                            missileBoxLocation.remove(missileBoxLocation.get(i));
+
+                            scene.getChildren().remove(missileBoxes.get(i));
+                            missileBoxes.remove(missileBoxes.get(i));
+
+                            for (int x = 0; x < 10; x++){
+                                Image image = new Image("com/game/firstgame/images/SpaceInvaderAnim/Missile.png", 10, 30, true, false);
+                                ImageView missile = new ImageView(image);
+                                missiles.add(missile);
+                            }
+                        }
+
+
+                        // If the powerUp went past the screen remove its existence
+                        if (Boolean.TRUE.equals(missileBoxLocationMaxY > 750)) {
+                            missileBoxLocation.get(i).stop();
+                            missileBoxLocation.remove(missileBoxLocation.get(i));
+
+                            scene.getChildren().remove(missileBoxes.get(i));
+                            missileBoxes.remove(missileBoxes.get(i));
+                        }
+                    }
+                }
             }
         };
 
@@ -269,9 +302,15 @@ public class Controller implements Initializable {
         missileBoxLocation = new ArrayList<>();
         powerUpAnimations = new ArrayList<>();
         Timeline spawnMissileTimeline = new Timeline(
-                new KeyFrame(Duration.seconds(2), event -> {
+                new KeyFrame(Duration.seconds(10), event -> {
                     if (missileFired) {
                         System.out.println("Spawned missile box");
+
+                        for (ImageView powerUp: missileBoxes) {
+                            powerUp.translateXProperty().addListener(enemyListener);
+                            powerUp.translateYProperty().addListener(enemyListener);
+                        }
+
                         spawnMissiles();
                     }
                 })
@@ -281,10 +320,10 @@ public class Controller implements Initializable {
 
 
 
-
+        // Initialize the missiles
         missiles = new ArrayList<>();
         translations = new ArrayList<>();
-        for (int i = 0; i < 50; i++){
+        for (int i = 0; i < 5; i++){
             Image image = new Image("com/game/firstgame/images/SpaceInvaderAnim/Missile.png", 10, 30, true, false);
             ImageView missile = new ImageView(image);
             missiles.add(missile);
@@ -432,7 +471,7 @@ public class Controller implements Initializable {
 
         int randomPosition = (rand.nextInt(15 - 1) + 1) * 30;
 
-        Image image = new Image("com/game/firstgame/images/Powerup/powerup01_1.png", 20, 20, true, true);
+        Image image = new Image("com/game/firstgame/images/Powerup/powerup01_1.png", 25, 25, true, true);
         ImageView missileBox = new ImageView(image);
         missileBox.setY(-20);
         missileBox.setX(randomPosition);
@@ -447,7 +486,7 @@ public class Controller implements Initializable {
 
         Path path = new Path();
         path.getElements().add(new MoveTo(missileBox.getX(),0));
-        path.getElements().add(new VLineTo(760));
+        path.getElements().add(new VLineTo(780));
 
         move.setDuration(Duration.seconds(8));
         //move.setCycleCount(PathTransition.INDEFINITE);

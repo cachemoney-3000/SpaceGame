@@ -46,8 +46,8 @@ public class PowerUpAnimation {
     public PowerUpAnimation(AnchorPane scene, ImageView runner) {
         this.runner = runner;
         this.scene = scene;
-        this.runner.setFitHeight(70);
-        this.runner.setFitWidth(70);
+        this.runner.setFitHeight(25);
+        this.runner.setFitWidth(25);
         timeline.setCycleCount(Animation.INDEFINITE);
     }
 
