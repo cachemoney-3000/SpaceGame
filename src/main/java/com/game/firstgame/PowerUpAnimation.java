@@ -51,6 +51,8 @@ public class PowerUpAnimation {
         timeline.setCycleCount(Animation.INDEFINITE);
     }
 
+
+
     public void startAnimation(){
         timeline.play();
     }

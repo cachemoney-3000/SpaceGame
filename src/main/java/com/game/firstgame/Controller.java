@@ -61,6 +61,7 @@ public class Controller implements Initializable {
     private ArrayList<ImageView> missileBoxes;
     private ArrayList<PathTransition> missileBoxLocation;
     private ArrayList<PowerUpAnimation> powerUpAnimations;
+    private int missileUsed = 0;
 
 
 
@@ -111,6 +112,9 @@ public class Controller implements Initializable {
         playerAnimation = new PlayerAnimation(player);
         playerAnimationInvisible = new PlayerAnimationInvisible(player);
 
+        // Initialize the missiles
+        Missiles missileObject = new Missiles(scene);
+
         // Initialize the background
         BackgroundAnimation backgroundAnimation = new BackgroundAnimation(background1, background2);
         backgroundAnimation.loopingBackground();
@@ -124,7 +128,7 @@ public class Controller implements Initializable {
         ChangeListener<Number> enemyListener = (ov, oldValue, newValue) -> {
             Bounds playerBounds = player.localToScene(player.getBoundsInLocal());
             double playerLocation_x = playerBounds.getMinX();
-            double playerLocation_y = playerBounds.getMaxY() - 38;
+            double playerLocation_y = playerBounds.getMaxY() - 40;
             if (missileFired) {
                 if (!enemies.isEmpty())  {
                     // Check every alien
@@ -171,7 +175,7 @@ public class Controller implements Initializable {
                     //Check every asteroid
                     for (int i = 0; i < asteroids.size(); i++) {
                         Bounds asteroidBounds = asteroids.get(i).localToScene(asteroids.get(i).getBoundsInLocal());
-                        double asteroidLocationMinY = asteroidBounds.getMinY() + 10;
+                        double asteroidLocationMinY = asteroidBounds.getMinY() + 15;
                         double asteroidLocationCenterX = asteroidBounds.getCenterX();
 
                         // Check if the asteroid hits the player
@@ -215,6 +219,7 @@ public class Controller implements Initializable {
                     addAsteroid++;
                 }
 
+                // FIX THIS LAGGING
                 if (!missileBoxes.isEmpty()) {
                     //Check every asteroid
                     for (int i = 0; i < missileBoxes.size(); i++) {
@@ -226,7 +231,6 @@ public class Controller implements Initializable {
                         // Check if the powerUp hits the player
                         if (playerBounds.intersects(missileBoxesBounds) && playerLocation_y > missileBoxLocationMinY) {
                             System.out.println("PLAYER HIT BY THE POWERUP");
-                            missileCounter += 10;
 
                             missileBoxLocation.get(i).stop();
                             missileBoxLocation.remove(missileBoxLocation.get(i));
@@ -234,11 +238,8 @@ public class Controller implements Initializable {
                             scene.getChildren().remove(missileBoxes.get(i));
                             missileBoxes.remove(missileBoxes.get(i));
 
-                            for (int x = 0; x < 10; x++){
-                                Image image = new Image("com/game/firstgame/images/SpaceInvaderAnim/Missile.png", 10, 30, true, false);
-                                ImageView missile = new ImageView(image);
-                                missiles.add(missile);
-                            }
+                            missileCounter += 10;
+                            missileObject.loadMissileImages();
                         }
 
 
@@ -255,9 +256,9 @@ public class Controller implements Initializable {
             }
         };
 
-        // Spawn aliens every 8 seconds
+        // Spawn aliens every 5 seconds
         Timeline spawnAlienTimeline = new Timeline(
-                new KeyFrame(Duration.seconds(8), event -> {
+                new KeyFrame(Duration.seconds(5), event -> {
                     if (enemies.size() <= 15) {
                         enemy.spawnEnemies();
                         enemyStopping.get(enemy.getEnemies().size() - 1).play();
@@ -298,11 +299,11 @@ public class Controller implements Initializable {
         outOfBoundsAsteroids = asteroidBelt.getOutOfBoundsAsteroids();
         asteroidAnimations = asteroidBelt.getAsteroidAnimations();
 
-        missileBoxes = new ArrayList<>();
-        missileBoxLocation = new ArrayList<>();
-        powerUpAnimations = new ArrayList<>();
+        missileBoxes = missileObject.getMissileBoxes();
+        missileBoxLocation = missileObject.getMissileBoxLocation();
+        powerUpAnimations = missileObject.getPowerUpAnimations();
         Timeline spawnMissileTimeline = new Timeline(
-                new KeyFrame(Duration.seconds(10), event -> {
+                new KeyFrame(Duration.seconds(2), event -> {
                     if (missileFired) {
                         System.out.println("Spawned missile box");
 
@@ -311,31 +312,23 @@ public class Controller implements Initializable {
                             powerUp.translateYProperty().addListener(enemyListener);
                         }
 
-                        spawnMissiles();
+                        missileObject.spawnMissiles();
                     }
                 })
         );
         spawnMissileTimeline.setCycleCount(Animation.INDEFINITE);
         spawnMissileTimeline.play();
 
-
-
-        // Initialize the missiles
-        missiles = new ArrayList<>();
+        // LOAD MISSILES
+        missiles = missileObject.getMissiles();
         translations = new ArrayList<>();
-        for (int i = 0; i < 5; i++){
-            Image image = new Image("com/game/firstgame/images/SpaceInvaderAnim/Missile.png", 10, 30, true, false);
-            ImageView missile = new ImageView(image);
-            missiles.add(missile);
-        }
+        missileObject.loadMissileImages();
+
 
         // When SPACE key was released, the player will shoot missile
         transition = new TranslateTransition();
         scene.addEventFilter(KeyEvent.KEY_RELEASED, event->{
             if (event.getCode() == KeyCode.SPACE && missileCounter >= 0) {
-                // Change the player ship from being invisible to normal
-                Image changePlayer = new Image("com/game/firstgame/images/Player/tile000.png");
-                player.setImage(changePlayer);
 
                 // Loads up the missile
                 ImageView getMissile = missiles.get(missiles.size() - 1);
@@ -423,6 +416,7 @@ public class Controller implements Initializable {
                 missileCounter--;
                 missiles.remove(missiles.size() - 1);
                 missileFired = true;
+                missileUsed++;
             }
         });
         addListener(player, enemyListener);
@@ -465,38 +459,6 @@ public class Controller implements Initializable {
     }
 
 
-    private void spawnMissiles() {
-        Random rand = new Random();
-        PathTransition move = new PathTransition();
-
-        int randomPosition = (rand.nextInt(15 - 1) + 1) * 30;
-
-        Image image = new Image("com/game/firstgame/images/Powerup/powerup01_1.png", 25, 25, true, true);
-        ImageView missileBox = new ImageView(image);
-        missileBox.setY(-20);
-        missileBox.setX(randomPosition);
-
-        PowerUpAnimation powerUpAnimation = new PowerUpAnimation(scene, missileBox);
-        powerUpAnimation.startAnimation();
-
-        scene.getChildren().add(missileBox);
-        missileBoxes.add(missileBox);
-
-        move.setNode(missileBoxes.get(missileBoxes.size() - 1));
-
-        Path path = new Path();
-        path.getElements().add(new MoveTo(missileBox.getX(),0));
-        path.getElements().add(new VLineTo(780));
-
-        move.setDuration(Duration.seconds(8));
-        //move.setCycleCount(PathTransition.INDEFINITE);
-        move.setPath(path);
-
-        missileBoxLocation.add(move);
-        powerUpAnimations.add(powerUpAnimation);
-
-        move.play();
-    }
     private void addListener(ImageView getMissile, ChangeListener<Number> missileListener) {
         for (ImageView asteroid: asteroids) {
             asteroid.translateXProperty().addListener(missileListener);
