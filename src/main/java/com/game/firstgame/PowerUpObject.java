@@ -12,19 +12,21 @@ import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Missiles {
+public class PowerUpObject {
     private final ArrayList<ImageView> missiles;
     private final AnchorPane scene;
     private final ArrayList<ImageView> missileBoxes;
     private final ArrayList<PathTransition> missileBoxLocation;
     private final ArrayList<PowerUpAnimation> powerUpAnimations;
+    private ArrayList <Integer> powerUpTypes;
 
-    public Missiles (AnchorPane scene) {
+    public PowerUpObject (AnchorPane scene) {
         this.scene = scene;
         missiles = new ArrayList<>();
         missileBoxes = new ArrayList<>();
         missileBoxLocation = new ArrayList<>();
         powerUpAnimations = new ArrayList<>();
+        powerUpTypes = new ArrayList<>();
     }
 
     public void loadMissileImages () {
@@ -36,7 +38,7 @@ public class Missiles {
 
     }
 
-    public void spawnMissiles() {
+    public void spawnPowerUp() {
         Random rand = new Random();
         PathTransition move = new PathTransition();
 
@@ -47,8 +49,10 @@ public class Missiles {
         missileBox.setY(-20);
         missileBox.setX(randomPosition);
 
-        PowerUpAnimation powerUpAnimation = new PowerUpAnimation(scene, missileBox);
+        int powerUpType = rand.nextInt(3);
+        PowerUpAnimation powerUpAnimation = new PowerUpAnimation(scene, missileBox, powerUpType);
         powerUpAnimation.startAnimation();
+        powerUpTypes.add(powerUpType);
 
         scene.getChildren().add(missileBox);
         missileBoxes.add(missileBox);
@@ -83,5 +87,9 @@ public class Missiles {
 
     public ArrayList<PowerUpAnimation> getPowerUpAnimations() {
         return powerUpAnimations;
+    }
+
+    public ArrayList<Integer> getPowerUpTypes() {
+        return powerUpTypes;
     }
 }

@@ -62,6 +62,7 @@ public class Controller implements Initializable {
     private ArrayList<PathTransition> missileBoxLocation;
     private ArrayList<PowerUpAnimation> powerUpAnimations;
     private int missileUsed = 0;
+    private ArrayList <Integer> powerUpTypes;
 
 
 
@@ -113,7 +114,7 @@ public class Controller implements Initializable {
         playerAnimationInvisible = new PlayerAnimationInvisible(player);
 
         // Initialize the missiles
-        Missiles missileObject = new Missiles(scene);
+        PowerUpObject powerUpObject = new PowerUpObject(scene);
 
         // Initialize the background
         BackgroundAnimation backgroundAnimation = new BackgroundAnimation(background1, background2);
@@ -230,26 +231,23 @@ public class Controller implements Initializable {
 
                         // Check if the powerUp hits the player
                         if (playerBounds.intersects(missileBoxesBounds) && playerLocation_y > missileBoxLocationMinY) {
-                            System.out.println("PLAYER HIT BY THE POWERUP");
+                            String powerUpTypeString;
+                            if (powerUpTypes.get(i) == 0) powerUpTypeString = "MISSILE";
+                            else if (powerUpTypes.get(i) == 1) powerUpTypeString = "LIFE";
+                            else powerUpTypeString = "BONUS";
 
-                            missileBoxLocation.get(i).stop();
-                            missileBoxLocation.remove(missileBoxLocation.get(i));
 
-                            scene.getChildren().remove(missileBoxes.get(i));
-                            missileBoxes.remove(missileBoxes.get(i));
+                            System.out.println("POWERUP ^^^ " + powerUpTypeString);
 
+                            removePowerUp(i);
                             missileCounter += 10;
-                            missileObject.loadMissileImages();
+                            powerUpObject.loadMissileImages();
                         }
 
 
                         // If the powerUp went past the screen remove its existence
                         if (Boolean.TRUE.equals(missileBoxLocationMaxY > 750)) {
-                            missileBoxLocation.get(i).stop();
-                            missileBoxLocation.remove(missileBoxLocation.get(i));
-
-                            scene.getChildren().remove(missileBoxes.get(i));
-                            missileBoxes.remove(missileBoxes.get(i));
+                            removePowerUp(i);
                         }
                     }
                 }
@@ -299,9 +297,7 @@ public class Controller implements Initializable {
         outOfBoundsAsteroids = asteroidBelt.getOutOfBoundsAsteroids();
         asteroidAnimations = asteroidBelt.getAsteroidAnimations();
 
-        missileBoxes = missileObject.getMissileBoxes();
-        missileBoxLocation = missileObject.getMissileBoxLocation();
-        powerUpAnimations = missileObject.getPowerUpAnimations();
+
         Timeline spawnMissileTimeline = new Timeline(
                 new KeyFrame(Duration.seconds(2), event -> {
                     if (missileFired) {
@@ -312,17 +308,22 @@ public class Controller implements Initializable {
                             powerUp.translateYProperty().addListener(enemyListener);
                         }
 
-                        missileObject.spawnMissiles();
+                        powerUpObject.spawnPowerUp();
                     }
                 })
         );
         spawnMissileTimeline.setCycleCount(Animation.INDEFINITE);
         spawnMissileTimeline.play();
 
+        missileBoxes = powerUpObject.getMissileBoxes();
+        missileBoxLocation = powerUpObject.getMissileBoxLocation();
+        powerUpAnimations = powerUpObject.getPowerUpAnimations();
+        powerUpTypes = powerUpObject.getPowerUpTypes();
+
         // LOAD MISSILES
-        missiles = missileObject.getMissiles();
+        missiles = powerUpObject.getMissiles();
         translations = new ArrayList<>();
-        missileObject.loadMissileImages();
+        powerUpObject.loadMissileImages();
 
 
         // When SPACE key was released, the player will shoot missile
@@ -456,6 +457,19 @@ public class Controller implements Initializable {
                 }
             }
         }));
+    }
+
+    private void removePowerUp(int i) {
+        missileBoxLocation.get(i).stop();
+        missileBoxLocation.remove(missileBoxLocation.get(i));
+
+        scene.getChildren().remove(missileBoxes.get(i));
+        missileBoxes.remove(missileBoxes.get(i));
+
+        powerUpAnimations.get(i).stopAnimation();
+        powerUpAnimations.remove(powerUpAnimations.get(i));
+
+        powerUpTypes.remove(powerUpTypes.get(i));
     }
 
 
