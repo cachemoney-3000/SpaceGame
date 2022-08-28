@@ -23,32 +23,22 @@
             <Image url="@images/Player/invisible/inv1.png" />
          </image>
       </ImageView>
-      <Text fill="WHITE" layoutX="14.0" layoutY="57.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Score:" wrappingWidth="183.13671875">
-         <font>
-            <Font name="Arial Bold" size="40.0" />
-         </font>
-      </Text>
-      <Text fill="WHITE" layoutX="302.0" layoutY="56.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Life:" wrappingWidth="183.13671875">
-         <font>
-            <Font name="Arial Bold" size="40.0" />
-         </font>
-      </Text>
-      <Text fx:id="scoreBoard" fill="WHITE" layoutX="148.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0" wrappingWidth="98.13671875">
+      <ImageView fitHeight="92.0" fitWidth="500.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@images/ScoreBoard/scoreBoardTop.png" />
+         </image>
+      </ImageView>
+      <Text fx:id="scoreBoard" fill="WHITE" layoutX="132.0" layoutY="32.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0" wrappingWidth="98.13671875">
          <font>
             <Font name="Arial Bold" size="20.0" />
          </font>
       </Text>
-      <Text fx:id="lifeBoard" fill="WHITE" layoutX="394.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0" wrappingWidth="98.13671875">
+      <Text fx:id="lifeBoard" fill="WHITE" layoutX="376.0" layoutY="32.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0" wrappingWidth="98.13671875">
          <font>
             <Font name="Arial Bold" size="20.0" />
          </font>
       </Text>
-      <Text fill="WHITE" layoutX="14.0" layoutY="102.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Missiles:" wrappingWidth="183.13671875">
-         <font>
-            <Font name="Arial Bold" size="29.0" />
-         </font>
-      </Text>
-      <Text fx:id="missileBoard" fill="WHITE" layoutX="148.0" layoutY="98.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0" wrappingWidth="98.13671875">
+      <Text fx:id="missileBoard" fill="WHITE" layoutX="14.0" layoutY="83.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0" wrappingWidth="98.13671875">
          <font>
             <Font name="Arial Bold" size="20.0" />
          </font>
