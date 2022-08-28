@@ -15,6 +15,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.*;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.net.URL;
@@ -64,6 +65,11 @@ public class Controller implements Initializable {
     private int missileUsed = 0;
     private ArrayList <Integer> powerUpTypes;
 
+    private int remainingLife;
+    private int playerScore = 0;
+
+    private Boolean alreadyHit = false;
+
 
 
     @FXML
@@ -74,9 +80,15 @@ public class Controller implements Initializable {
     private AnchorPane scene;
     @FXML
     private ImageView player;
-
     @FXML
     private Pane root;
+
+    @FXML
+    private Text scoreBoard;
+    @FXML
+    private Text lifeBoard;
+    @FXML
+    private Text missileBoard;
 
 
 
@@ -106,6 +118,11 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        remainingLife = 5000;
+        lifeBoard.setText(String.valueOf(remainingLife));
+        missileBoard.setText(String.valueOf(missileCounter  + 1));
+
+
         // Initialize the player
         playerMovement = new PlayerMovement(scene, player, wPressed, aPressed, sPressed, dPressed, spacePressed);
         playerSize = playerMovement.getPlayerSize();
@@ -141,8 +158,16 @@ public class Controller implements Initializable {
 
                         // Check if the player was hit by an alien
                         if (playerBounds.intersects(enemyBounds) && playerLocation_y > alienLocationMinY) {
-                            System.out.println("PLAYER HIT BY ALIEN");
+                            //System.out.println("PLAYER HIT BY ALIEN");
+                            remainingLife--;
+                            lifeBoard.setText(String.valueOf(remainingLife));
+
+                            if (remainingLife == 0) {
+                                System.out.println("PLAYER DESTROYED");
+                            }
                         }
+
+
                         // If an alien went past the screen, spawn new enemy
                         if (Boolean.TRUE.equals(alienLocationMaxY > 760)) {
                             enemyLocation.get(i).stop();
@@ -155,10 +180,6 @@ public class Controller implements Initializable {
                                 enemy.spawnEnemies();
 
 
-                        }
-                        // Alien is in the screen
-                        else if (alienLocationMaxY >= 0 && alienLocationMaxY <= 760) {
-                            //outOfBounds.set(i, false);
                         }
                     }
                 }
@@ -181,9 +202,14 @@ public class Controller implements Initializable {
 
                         // Check if the asteroid hits the player
                         if (playerBounds.intersects(asteroidBounds) && playerLocation_y > asteroidLocationMinY && missileFired) {
-                            System.out.println("PLAYER HIT BY ASTEROID");
-                        }
+                            //System.out.println("PLAYER HIT BY ASTEROID");
+                            remainingLife--;
+                            lifeBoard.setText(String.valueOf(remainingLife));
 
+                            if (remainingLife == 0) {
+                                System.out.println("PLAYER DESTROYED");
+                            }
+                        }
 
 
                         // If the asteroid went past the screen, spawn new asteroids in a different location
@@ -204,10 +230,6 @@ public class Controller implements Initializable {
                             }
 
                         }
-                        // Asteroid is in the screen
-                        else if (asteroidLocationCenterX > 0 && asteroidLocationCenterX < 500) {
-                            //outOfBoundsAsteroids.set(i, false);
-                        }
                     }
                 }
                 // If there are no more enemies, spawn more
@@ -220,7 +242,6 @@ public class Controller implements Initializable {
                     addAsteroid++;
                 }
 
-                // FIX THIS LAGGING
                 if (!missileBoxes.isEmpty()) {
                     //Check every asteroid
                     for (int i = 0; i < missileBoxes.size(); i++) {
@@ -232,16 +253,31 @@ public class Controller implements Initializable {
                         // Check if the powerUp hits the player
                         if (playerBounds.intersects(missileBoxesBounds) && playerLocation_y > missileBoxLocationMinY) {
                             String powerUpTypeString;
-                            if (powerUpTypes.get(i) == 0) powerUpTypeString = "MISSILE";
-                            else if (powerUpTypes.get(i) == 1) powerUpTypeString = "LIFE";
-                            else powerUpTypeString = "BONUS";
+                            if (powerUpTypes.get(i) == 0) {
+                                powerUpTypeString = "MISSILE";
 
+                                // Increase player missile
+                                missileCounter += 10;
+                                powerUpObject.loadMissileImages();
 
-                            System.out.println("POWERUP ^^^ " + powerUpTypeString);
+                                missileBoard.setText(String.valueOf(missileCounter  + 1));
+                            }
+                            else if (powerUpTypes.get(i) == 1) {
+                                powerUpTypeString = "LIFE";
+
+                                // Increase player life
+                                remainingLife += 500;
+                                lifeBoard.setText(String.valueOf(remainingLife));
+                            }
+                            else {
+                                powerUpTypeString = "BONUS";
+
+                                // Increase playerScore
+                                playerScore += 250;
+                                scoreBoard.setText(String.valueOf(playerScore));
+                            }
 
                             removePowerUp(i);
-                            missileCounter += 10;
-                            powerUpObject.loadMissileImages();
                         }
 
 
@@ -301,8 +337,6 @@ public class Controller implements Initializable {
         Timeline spawnMissileTimeline = new Timeline(
                 new KeyFrame(Duration.seconds(2), event -> {
                     if (missileFired) {
-                        System.out.println("Spawned missile box");
-
                         for (ImageView powerUp: missileBoxes) {
                             powerUp.translateXProperty().addListener(enemyListener);
                             powerUp.translateYProperty().addListener(enemyListener);
@@ -327,9 +361,12 @@ public class Controller implements Initializable {
 
 
         // When SPACE key was released, the player will shoot missile
+        player.setFocusTraversable(true);
+        player.requestFocus();
         transition = new TranslateTransition();
         scene.addEventFilter(KeyEvent.KEY_RELEASED, event->{
             if (event.getCode() == KeyCode.SPACE && missileCounter >= 0) {
+
 
                 // Loads up the missile
                 ImageView getMissile = missiles.get(missiles.size() - 1);
@@ -364,12 +401,9 @@ public class Controller implements Initializable {
 
                             // Check if the missile hit an alien
                             if (missileBounds.intersects(enemyBounds)) {
-                                System.out.println("------------------------------------");
-                                System.out.println("ENEMY #" + i + " HIT ");
-                                System.out.println("ENEMY Y POS = " + enemyBounds.getMinX());
-                                System.out.println("ENEMY X POS = " + enemyBounds.getMinY());
-                                System.out.println("------------------------------------");
-                                System.out.println();
+                                // Increase playerScore
+                                playerScore += 100;
+                                scoreBoard.setText(String.valueOf(playerScore));
 
                                 // Play explosion animation
                                 explosionAnimation = new ExplosionAnimation(scene, enemies.get(i));
@@ -386,12 +420,9 @@ public class Controller implements Initializable {
                             Bounds asteroidBounds = asteroids.get(i).localToScene(asteroids.get(i).getBoundsInLocal());
 
                             if (missileBounds.intersects(asteroidBounds)) {
-                                System.out.println("------------------------------------");
-                                System.out.println("ASTEROID #" + i + " HIT ");
-                                System.out.println("ASTEROID Y POS = " + asteroidBounds.getMinX());
-                                System.out.println("ASTEROID X POS = " + asteroidBounds.getMinY());
-                                System.out.println("------------------------------------");
-                                System.out.println();
+                                // Increase playerScore
+                                playerScore += 50;
+                                scoreBoard.setText(String.valueOf(playerScore));
 
                                 // Play explosion animation for the asteroid
                                 explosionAnimation = new ExplosionAnimation(scene, asteroids.get(i));
@@ -417,7 +448,8 @@ public class Controller implements Initializable {
                 missileCounter--;
                 missiles.remove(missiles.size() - 1);
                 missileFired = true;
-                missileUsed++;
+
+                missileBoard.setText(String.valueOf(missileCounter + 1));
             }
         });
         addListener(player, enemyListener);
