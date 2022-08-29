@@ -223,10 +223,10 @@ public class Controller implements Initializable {
 
                 spawnPlayer();
                 populateTheCounters();
-
                 spawnedEntities();
                 shootTheMissile();
                 gamePlayTimeline();
+                movementTimer.stop();
 
             });
 
@@ -251,7 +251,7 @@ public class Controller implements Initializable {
     }
 
     public void populateTheCounters () {
-        missileCounter = 4;
+        missileCounter = 5;
         switchMissile = 0;
         missileFired = false;
         addEnemy = 3;
@@ -262,8 +262,16 @@ public class Controller implements Initializable {
         remainingLife = 1000;
         playerScore = 0;
         lifeBoard.setText(String.valueOf(remainingLife));
-        missileBoard.setText(String.valueOf(missileCounter  + 1));
+        missileBoard.setText(String.valueOf(missileCounter + 1));
         scoreBoard.setText(String.valueOf(playerScore));
+
+
+        missiles = new ArrayList<>();
+        for (int i = 0; i < missileCounter + 1; i++) {
+            Image image = new Image("com/game/firstgame/images/Player/missile.png", 10, 30, true, false);
+            ImageView missile = new ImageView(image);
+            missiles.add(missile);
+        }
     }
 
     public void spawnPlayer() {
