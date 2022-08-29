@@ -45,7 +45,7 @@ public class Controller implements Initializable {
     private TranslateTransition transition;
     private List<ImageView> missiles;
     private List<ImageView> enemies;
-    private List<TranslateTransition> translations;
+
     private ExplosionAnimation explosionAnimation;
     private ImageView alien;
     private List<PathTransition> enemyLocation;
@@ -132,8 +132,10 @@ public class Controller implements Initializable {
             // Increase player missile
             missileCounter += 10;
             powerUpObject.loadMissileImages();
+            List <ImageView> getAddedMissiles = powerUpObject.getMissiles();
+            missiles.addAll(getAddedMissiles);
 
-            missileBoard.setText(String.valueOf(missileCounter  + 1));
+            missileBoard.setText(String.valueOf(missileCounter));
         }
         else if (powerUpTypes.get(i) == 1) {
             // Increase player life
@@ -185,7 +187,7 @@ public class Controller implements Initializable {
         scene.getChildren().removeAll(missiles);
         missiles.clear();
 
-        translations.clear();
+
 
 
     }
@@ -223,9 +225,8 @@ public class Controller implements Initializable {
 
                 spawnPlayer();
                 populateTheCounters();
-                spawnedEntities();
-                shootTheMissile();
-                gamePlayTimeline();
+                //spawnedEntities();
+                //gamePlayTimeline();
                 movementTimer.stop();
 
             });
@@ -257,17 +258,18 @@ public class Controller implements Initializable {
         addEnemy = 3;
         addAsteroid = 4;
         popUpShowed = false;
+        transition = new TranslateTransition();
 
         // Initialize the scoreboard
         remainingLife = 1000;
         playerScore = 0;
         lifeBoard.setText(String.valueOf(remainingLife));
-        missileBoard.setText(String.valueOf(missileCounter + 1));
+        missileBoard.setText(String.valueOf(missileCounter));
         scoreBoard.setText(String.valueOf(playerScore));
 
 
         missiles = new ArrayList<>();
-        for (int i = 0; i < missileCounter + 1; i++) {
+        for (int i = 0; i < missileCounter; i++) {
             Image image = new Image("com/game/firstgame/images/Player/missile.png", 10, 30, true, false);
             ImageView missile = new ImageView(image);
             missiles.add(missile);
@@ -287,6 +289,9 @@ public class Controller implements Initializable {
         playerMovement.movementSetup();
         playerAnimation = new PlayerAnimation(player);
         playerAnimationInvisible = new PlayerAnimationInvisible(player);
+
+        player.setFocusTraversable(true);
+        player.requestFocus();
     }
 
     public void initBackground() {
@@ -320,7 +325,6 @@ public class Controller implements Initializable {
                         if (playerBounds.intersects(enemyBounds) && playerLocationY > alienLocationMinY && isGameOver()) {
                             cleanUp();
                             popUpResetButton();
-
                         }
                         // If an alien went past the screen, spawn new enemy
                         if (Boolean.TRUE.equals(alienLocationMaxY > 760)) {
@@ -464,9 +468,9 @@ public class Controller implements Initializable {
         powerUpAnimations = powerUpObject.getPowerUpAnimations();
         powerUpTypes = powerUpObject.getPowerUpTypes();
         // LOAD MISSILES
-        missiles = powerUpObject.getMissiles();
-        translations = new ArrayList<>();
-        powerUpObject.loadMissileImages();
+
+
+
     }
 
     public void gamePlayTimeline () {
@@ -485,22 +489,20 @@ public class Controller implements Initializable {
 
     public void shootTheMissile() {
         // When SPACE key was released, the player will shoot missile
-        player.setFocusTraversable(true);
-        player.requestFocus();
-        transition = new TranslateTransition();
         scene.addEventFilter(KeyEvent.KEY_RELEASED, event->{
-            if (event.getCode() == KeyCode.SPACE && missileCounter >= 0) {
+            if (event.getCode() == KeyCode.SPACE && missileCounter > 0) {
                 // Loads up the missile
                 ImageView getMissile = missiles.get(missiles.size() - 1);
                 // Switches the location of where the missile will be fired
                 if (switchMissile == 0) {
-                    getMissile.setX(player.getLayoutX() + 3);
+                    getMissile.setLayoutX(player.getLayoutX() + 3);
                     switchMissile = 1;
                 } else if (switchMissile == 1) {
-                    getMissile.setX(player.getLayoutX() + 25);
+                    getMissile.setLayoutX(player.getLayoutX() + 25);
                     switchMissile = 0;
                 }
-                getMissile.setY(player.getLayoutY() - 20);
+                getMissile.setLayoutY(player.getLayoutY() - 20);
+
 
                 // Set the fire rate for the missile
                 transition.setNode(getMissile);
@@ -508,7 +510,7 @@ public class Controller implements Initializable {
                 transition.setToY(-750);
                 transition.setByY(player.getLayoutY() - 20);
                 transition.play();
-                translations.add(transition);
+
                 // Deploy the missile
                 scene.getChildren().add(getMissile);
 
@@ -560,6 +562,12 @@ public class Controller implements Initializable {
                                 asteroids.remove(asteroids.get(i));
                             }
                         }
+
+                        if (missileBounds.getMinY() < 0){
+                            scene.getChildren().remove(getMissile);
+                            missiles.remove(getMissile);
+
+                        }
                     }
                 };
 
@@ -571,7 +579,7 @@ public class Controller implements Initializable {
                 missiles.remove(missiles.size() - 1);
                 missileFired = true;
 
-                missileBoard.setText(String.valueOf(missileCounter + 1));
+                missileBoard.setText(String.valueOf(missileCounter));
             }
         });
     }
