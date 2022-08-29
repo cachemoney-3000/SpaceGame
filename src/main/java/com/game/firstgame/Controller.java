@@ -120,11 +120,11 @@ public class Controller implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         spawnPlayer();
         populateTheCounters();
+        playerMovement();
         initBackground();
         spawnedEntities();
         shootTheMissile();
         gamePlayTimeline();
-        playerMovement();
     }
 
     private void getPowerUp(PowerUpObject powerUpObject, int i) {
@@ -153,6 +153,7 @@ public class Controller implements Initializable {
 
     private boolean isGameOver() {
         if (remainingLife == 0) {
+            movementTimer.stop();
             return true;
         }
         else {
@@ -187,9 +188,6 @@ public class Controller implements Initializable {
         scene.getChildren().removeAll(missiles);
         missiles.clear();
 
-
-
-
     }
 
     private void removeAsteroid(int k) {
@@ -205,10 +203,10 @@ public class Controller implements Initializable {
 
     private void popUpResetButton () {
         if (!popUpShowed) {
-            Stage primaryStage = new Stage();
+            Stage popUpStage = new Stage();
             final Stage dialog = new Stage();
             dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.initOwner(primaryStage);
+            dialog.initOwner(popUpStage);
             VBox dialogVbox = new VBox(20);
 
             Button btn = new Button("Reset");
@@ -221,14 +219,10 @@ public class Controller implements Initializable {
 
             btn.setOnAction(event -> {
                 dialog.close();
-                primaryStage.close();
-
+                popUpStage.close();
                 spawnPlayer();
                 populateTheCounters();
-                //spawnedEntities();
-                //gamePlayTimeline();
-                movementTimer.stop();
-
+                movementTimer.start();
             });
 
             popUpShowed = true;
@@ -334,7 +328,11 @@ public class Controller implements Initializable {
                             scene.getChildren().remove(enemies.get(i));
                             enemies.remove(enemies.get(i));
 
-                            if (enemies.size() < 15 && remainingLife != 0) enemy.spawnEnemies();
+                            if (enemies.size() < 15 && remainingLife != 0) {
+                                for (int k = 0; k < 3; k++){
+                                    enemy.spawnEnemies();
+                                }
+                            }
                         }
                     }
                 }
@@ -367,7 +365,9 @@ public class Controller implements Initializable {
                         if (Boolean.TRUE.equals(asteroidLocationCenterX < -20 || asteroidLocationCenterX > 510)) {
                             removeAsteroid(i);
                             if (asteroids.size() <= 8 && remainingLife != 0) {
-                                asteroidBelt.spawnAsteroids();
+                                for (int k = 0; k < 3; k++){
+                                    asteroidBelt.spawnAsteroids();
+                                }
                             }
                         }
                     }
@@ -405,8 +405,8 @@ public class Controller implements Initializable {
 
         // Spawn aliens every 5 seconds
         Timeline spawnAlienTimeline = new Timeline(
-                new KeyFrame(Duration.seconds(5), event -> {
-                    if (enemies.size() <= 15 && remainingLife != 0) {
+                new KeyFrame(Duration.seconds(3), event -> {
+                    if (enemies.size() <= 20 && remainingLife != 0) {
                         enemy.spawnEnemies();
                         enemyStopping.get(enemy.getEnemies().size() - 1).play();
                         enemyStopping.get(0).play();
@@ -427,8 +427,8 @@ public class Controller implements Initializable {
 
         // Initialize the asteroids and spawn asteroids every 5 seconds
         Timeline spawnAsteroidsTimeline = new Timeline(
-                new KeyFrame(Duration.seconds(5), event -> {
-                    if (asteroids.size() <= 8 && remainingLife != 0) {
+                new KeyFrame(Duration.seconds(4), event -> {
+                    if (asteroids.size() <= 15 && remainingLife != 0) {
                         asteroidBelt.spawnAsteroids();
 
                         for (ImageView asteroid: asteroids) {

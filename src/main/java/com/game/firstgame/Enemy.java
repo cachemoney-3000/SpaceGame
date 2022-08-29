@@ -78,7 +78,7 @@ public class Enemy {
         path.getElements().add(new MoveTo(alien.getX(),0));
         path.getElements().add(new VLineTo(760));
 
-        move.setDuration(Duration.seconds(7));
+        move.setDuration(Duration.seconds(6));
         //move.setCycleCount(PathTransition.INDEFINITE);
         move.setDelay(Duration.millis(200));
         move.setPath(path);
