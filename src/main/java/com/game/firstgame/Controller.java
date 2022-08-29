@@ -8,67 +8,68 @@ import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.*;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Popup;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.ResourceBundle;
 
 
 public class Controller implements Initializable {
-    private BooleanProperty wPressed = new SimpleBooleanProperty();
-    private BooleanProperty aPressed = new SimpleBooleanProperty();
-    private BooleanProperty sPressed = new SimpleBooleanProperty();
-    private BooleanProperty dPressed = new SimpleBooleanProperty();
-    private BooleanProperty spacePressed = new SimpleBooleanProperty();
-    private BooleanBinding keyPressed = wPressed.or(aPressed).or(sPressed).or(dPressed).or(spacePressed);
-    private double playerSize;
-    private int movementVariable = 3;
+    private final BooleanProperty wPressed = new SimpleBooleanProperty();
+    private final BooleanProperty aPressed = new SimpleBooleanProperty();
+    private final BooleanProperty sPressed = new SimpleBooleanProperty();
+    private final BooleanProperty dPressed = new SimpleBooleanProperty();
+    private final BooleanProperty spacePressed = new SimpleBooleanProperty();
+    private final BooleanBinding keyPressed = wPressed.or(aPressed).or(sPressed).or(dPressed).or(spacePressed);
     private PlayerAnimation playerAnimation;
     private PlayerAnimationInvisible playerAnimationInvisible;
-    private int missileCounter = 4;
-    private int switchMissile = 0;
-    private boolean missileFired = false;
+    private int missileCounter;
+    private int switchMissile;
+    private boolean missileFired;
 
     private TranslateTransition transition;
-    private ArrayList<ImageView> missiles;
+    private List<ImageView> missiles;
     private List<ImageView> enemies;
-    private ArrayList<TranslateTransition> translations;
+    private List<TranslateTransition> translations;
     private ExplosionAnimation explosionAnimation;
     private ImageView alien;
     private List<PathTransition> enemyLocation;
     private List<Boolean> outOfBounds;
     private List<Timeline> enemyStopping;
-    private ArrayList<ImageView> asteroids;
-    private ArrayList<PathTransition> asteroidsLocation;
-    private ArrayList<Boolean> outOfBoundsAsteroids;
-    private ArrayList<AsteroidAnimation> asteroidAnimations;
-    private int addEnemy = 3;
-    private int addAsteroid = 4;
+    private List<ImageView> asteroids;
+    private List<PathTransition> asteroidsLocation;
+    private List<Boolean> outOfBoundsAsteroids;
+    private List<AsteroidAnimation> asteroidAnimations;
+    private int addEnemy;
+    private int addAsteroid;
     private PlayerMovement playerMovement;
     private Enemy enemy;
     private Asteroids asteroidBelt;
 
-    private ArrayList<ImageView> missileBoxes;
-    private ArrayList<PathTransition> missileBoxLocation;
-    private ArrayList<PowerUpAnimation> powerUpAnimations;
-    private int missileUsed = 0;
-    private ArrayList <Integer> powerUpTypes;
+    private List<ImageView> powerUps;
+    private List<PathTransition> powerUpLocations;
+    private List<PowerUpAnimation> powerUpAnimations;
+    private List <Integer> powerUpTypes;
 
     private int remainingLife;
-    private int playerScore = 0;
+    private int playerScore;
+    private boolean popUpShowed;
 
-    private Boolean alreadyHit = false;
 
 
 
@@ -78,11 +79,8 @@ public class Controller implements Initializable {
     private ImageView background2;
     @FXML
     private AnchorPane scene;
-    @FXML
-    private ImageView player;
-    @FXML
-    private Pane root;
 
+    private ImageView player;
     @FXML
     private Text scoreBoard;
     @FXML
@@ -95,6 +93,7 @@ public class Controller implements Initializable {
     AnimationTimer movementTimer = new AnimationTimer() {
         @Override
         public void handle(long timestamp) {
+            int movementVariable = 3;
             if(wPressed.get()) {
                 player.setLayoutY(player.getLayoutY() - movementVariable);
             }
@@ -118,14 +117,30 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        remainingLife = 5000;
+        player = new ImageView(new Image("com/game/firstgame/images/Player/invisible/inv1.png"));
+        player.setFitHeight(85);
+        player.setLayoutX(231);
+        player.setLayoutY(658);
+        player.setPreserveRatio(true);
+
+        scene.getChildren().add(player);
+
+        missileCounter = 4;
+        switchMissile = 0;
+        missileFired = false;
+        addEnemy = 3;
+        addAsteroid = 4;
+        popUpShowed = false;
+
+        // Initialize the scoreboard
+        remainingLife = 1000;
         lifeBoard.setText(String.valueOf(remainingLife));
         missileBoard.setText(String.valueOf(missileCounter  + 1));
-
+        playerScore = 0;
+        scoreBoard.setText(String.valueOf(playerScore));
 
         // Initialize the player
         playerMovement = new PlayerMovement(scene, player, wPressed, aPressed, sPressed, dPressed, spacePressed);
-        playerSize = playerMovement.getPlayerSize();
         playerMovement.movementSetup();
         playerAnimation = new PlayerAnimation(player);
         playerAnimationInvisible = new PlayerAnimationInvisible(player);
@@ -145,8 +160,7 @@ public class Controller implements Initializable {
         // Constantly check if the player was hit by an alien or asteroid
         ChangeListener<Number> enemyListener = (ov, oldValue, newValue) -> {
             Bounds playerBounds = player.localToScene(player.getBoundsInLocal());
-            double playerLocation_x = playerBounds.getMinX();
-            double playerLocation_y = playerBounds.getMaxY() - 40;
+            double playerLocationY = playerBounds.getMaxY() - 40;
             if (missileFired) {
                 if (!enemies.isEmpty())  {
                     // Check every alien
@@ -154,19 +168,14 @@ public class Controller implements Initializable {
                         Bounds enemyBounds = enemies.get(i).localToScene(enemies.get(i).getBoundsInLocal());
                         double alienLocationMaxY = enemyBounds.getMaxY();
                         double alienLocationMinY = enemyBounds.getMinY();
-                        double enemyLocation_x = enemyBounds.getCenterX();
 
                         // Check if the player was hit by an alien
-                        if (playerBounds.intersects(enemyBounds) && playerLocation_y > alienLocationMinY) {
-                            //System.out.println("PLAYER HIT BY ALIEN");
-                            remainingLife--;
-                            lifeBoard.setText(String.valueOf(remainingLife));
+                        if (playerBounds.intersects(enemyBounds) && playerLocationY > alienLocationMinY && isGameOver()) {
+                            //initialize(url, resourceBundle);
+                            clearAllEnemies(powerUpObject);
+                            popUpResetButton(url, resourceBundle);
 
-                            if (remainingLife == 0) {
-                                System.out.println("PLAYER DESTROYED");
-                            }
                         }
-
 
                         // If an alien went past the screen, spawn new enemy
                         if (Boolean.TRUE.equals(alienLocationMaxY > 760)) {
@@ -176,8 +185,7 @@ public class Controller implements Initializable {
                             scene.getChildren().remove(enemies.get(i));
                             enemies.remove(enemies.get(i));
 
-                            if (enemies.size() < 15)
-                                enemy.spawnEnemies();
+                            if (enemies.size() < 15 && remainingLife != 0) enemy.spawnEnemies();
 
 
                         }
@@ -186,11 +194,12 @@ public class Controller implements Initializable {
 
                 // If there are no more enemies, spawn more
                 else {
-                    System.out.println("No more enemies, spawned " + addEnemy + " more");
-                    for (int i = 0; i < addEnemy; i++){
-                        enemy.spawnEnemies();
+                    if (remainingLife != 0) {
+                        for (int i = 0; i < addEnemy; i++){
+                            enemy.spawnEnemies();
+                        }
+                        addEnemy++;
                     }
-                    addEnemy++;
                 }
 
                 if (!asteroids.isEmpty()) {
@@ -201,31 +210,21 @@ public class Controller implements Initializable {
                         double asteroidLocationCenterX = asteroidBounds.getCenterX();
 
                         // Check if the asteroid hits the player
-                        if (playerBounds.intersects(asteroidBounds) && playerLocation_y > asteroidLocationMinY && missileFired) {
-                            //System.out.println("PLAYER HIT BY ASTEROID");
-                            remainingLife--;
-                            lifeBoard.setText(String.valueOf(remainingLife));
+                        if (playerBounds.intersects(asteroidBounds) && playerLocationY > asteroidLocationMinY && isGameOver()) {
+                            //initialize(url, resourceBundle);
+                            clearAllEnemies(powerUpObject);
+                            popUpResetButton(url, resourceBundle);
 
-                            if (remainingLife == 0) {
-                                System.out.println("PLAYER DESTROYED");
-                            }
+
                         }
 
 
                         // If the asteroid went past the screen, spawn new asteroids in a different location
                         if (Boolean.TRUE.equals(asteroidLocationCenterX < -20 || asteroidLocationCenterX > 510)) {
 
-                            asteroidsLocation.get(i).stop();
-                            asteroidsLocation.remove(asteroidsLocation.get(i));
+                            removeAsteroid(i);
 
-                            asteroidAnimations.get(i).stopAnimation();
-                            asteroidAnimations.remove(asteroidAnimations.get(i));
-
-                            scene.getChildren().remove(asteroids.get(i));
-                            asteroids.remove(asteroids.get(i));
-
-                            if (asteroids.size() <= 8) {
-                                System.out.println("SPAWN MORE, asteroid size = " + asteroids.size());
+                            if (asteroids.size() <= 8 && remainingLife != 0) {
                                 asteroidBelt.spawnAsteroids();
                             }
 
@@ -234,56 +233,29 @@ public class Controller implements Initializable {
                 }
                 // If there are no more enemies, spawn more
                 else {
-                    System.out.println("No more asteroids, spawned " + addAsteroid + " more");
-                    System.out.println(asteroids.size());
-                    for (int i = 0; i < addAsteroid; i++){
-                        asteroidBelt.spawnAsteroids();
+                    if (remainingLife != 0) {
+                        for (int i = 0; i < addAsteroid; i++){
+                            asteroidBelt.spawnAsteroids();
+                        }
+                        addAsteroid++;
                     }
-                    addAsteroid++;
                 }
 
-                if (!missileBoxes.isEmpty()) {
+                if (!powerUps.isEmpty()) {
                     //Check every asteroid
-                    for (int i = 0; i < missileBoxes.size(); i++) {
-                        Bounds missileBoxesBounds = missileBoxes.get(i).localToScene(missileBoxes.get(i).getBoundsInLocal());
+                    for (int i = 0; i < powerUps.size(); i++) {
+                        Bounds missileBoxesBounds = powerUps.get(i).localToScene(powerUps.get(i).getBoundsInLocal());
                         double missileBoxLocationMinY = missileBoxesBounds.getMinY() + 10;
-                        double missileBoxLocationCenterX = missileBoxesBounds.getCenterX();
                         double missileBoxLocationMaxY = missileBoxesBounds.getMaxY();
 
                         // Check if the powerUp hits the player
-                        if (playerBounds.intersects(missileBoxesBounds) && playerLocation_y > missileBoxLocationMinY) {
-                            String powerUpTypeString;
-                            if (powerUpTypes.get(i) == 0) {
-                                powerUpTypeString = "MISSILE";
-
-                                // Increase player missile
-                                missileCounter += 10;
-                                powerUpObject.loadMissileImages();
-
-                                missileBoard.setText(String.valueOf(missileCounter  + 1));
-                            }
-                            else if (powerUpTypes.get(i) == 1) {
-                                powerUpTypeString = "LIFE";
-
-                                // Increase player life
-                                remainingLife += 500;
-                                lifeBoard.setText(String.valueOf(remainingLife));
-                            }
-                            else {
-                                powerUpTypeString = "BONUS";
-
-                                // Increase playerScore
-                                playerScore += 250;
-                                scoreBoard.setText(String.valueOf(playerScore));
-                            }
-
-                            removePowerUp(i);
+                        if (playerBounds.intersects(missileBoxesBounds) && playerLocationY > missileBoxLocationMinY) {
+                            getPowerUp(powerUpObject, i);
                         }
-
 
                         // If the powerUp went past the screen remove its existence
                         if (Boolean.TRUE.equals(missileBoxLocationMaxY > 750)) {
-                            removePowerUp(i);
+                            powerUpObject.removePowerUp(i);
                         }
                     }
                 }
@@ -293,7 +265,7 @@ public class Controller implements Initializable {
         // Spawn aliens every 5 seconds
         Timeline spawnAlienTimeline = new Timeline(
                 new KeyFrame(Duration.seconds(5), event -> {
-                    if (enemies.size() <= 15) {
+                    if (enemies.size() <= 15 && remainingLife != 0) {
                         enemy.spawnEnemies();
                         enemyStopping.get(enemy.getEnemies().size() - 1).play();
                         enemyStopping.get(0).play();
@@ -315,8 +287,7 @@ public class Controller implements Initializable {
         // Initialize the asteroids and spawn asteroids every 5 seconds
         Timeline spawnAsteroidsTimeline = new Timeline(
                 new KeyFrame(Duration.seconds(5), event -> {
-                    if (asteroids.size() <= 8) {
-                        System.out.println(asteroids.size());
+                    if (asteroids.size() <= 8 && remainingLife != 0) {
                         asteroidBelt.spawnAsteroids();
 
                         for (ImageView asteroid: asteroids) {
@@ -333,31 +304,45 @@ public class Controller implements Initializable {
         outOfBoundsAsteroids = asteroidBelt.getOutOfBoundsAsteroids();
         asteroidAnimations = asteroidBelt.getAsteroidAnimations();
 
-
-        Timeline spawnMissileTimeline = new Timeline(
+        // Timeline for spawning power ups on screen
+        Timeline spawnPowerUpsTimeline = new Timeline(
                 new KeyFrame(Duration.seconds(2), event -> {
-                    if (missileFired) {
-                        for (ImageView powerUp: missileBoxes) {
+                    if (missileFired && remainingLife != 0) {
+                        for (ImageView powerUp: powerUps ) {
                             powerUp.translateXProperty().addListener(enemyListener);
                             powerUp.translateYProperty().addListener(enemyListener);
                         }
 
                         powerUpObject.spawnPowerUp();
                     }
+
                 })
         );
-        spawnMissileTimeline.setCycleCount(Animation.INDEFINITE);
-        spawnMissileTimeline.play();
+        spawnPowerUpsTimeline.setCycleCount(Animation.INDEFINITE);
+        spawnPowerUpsTimeline.play();
 
-        missileBoxes = powerUpObject.getMissileBoxes();
-        missileBoxLocation = powerUpObject.getMissileBoxLocation();
+        powerUps = powerUpObject.getMissileBoxes();
+        powerUpLocations = powerUpObject.getMissileBoxLocation();
         powerUpAnimations = powerUpObject.getPowerUpAnimations();
         powerUpTypes = powerUpObject.getPowerUpTypes();
-
         // LOAD MISSILES
         missiles = powerUpObject.getMissiles();
         translations = new ArrayList<>();
         powerUpObject.loadMissileImages();
+
+
+        Timeline gameTimeline = new Timeline(
+                new KeyFrame(Duration.millis(250), event -> {
+                    if (remainingLife == 0) {
+                        explosionAnimation = new ExplosionAnimation(scene, player);
+                        explosionAnimation.startAnimation();
+                    }
+
+                })
+        );
+        gameTimeline.setCycleCount(Animation.INDEFINITE);
+        gameTimeline.play();
+
 
 
         // When SPACE key was released, the player will shoot missile
@@ -366,16 +351,14 @@ public class Controller implements Initializable {
         transition = new TranslateTransition();
         scene.addEventFilter(KeyEvent.KEY_RELEASED, event->{
             if (event.getCode() == KeyCode.SPACE && missileCounter >= 0) {
-
-
                 // Loads up the missile
                 ImageView getMissile = missiles.get(missiles.size() - 1);
                 // Switches the location of where the missile will be fired
                 if (switchMissile == 0) {
-                    getMissile.setX(player.getLayoutX() + 5);
+                    getMissile.setX(player.getLayoutX() + 3);
                     switchMissile = 1;
                 } else if (switchMissile == 1) {
-                    getMissile.setX(player.getLayoutX() + 30);
+                    getMissile.setX(player.getLayoutX() + 25);
                     switchMissile = 0;
                 }
                 getMissile.setY(player.getLayoutY() - 20);
@@ -457,8 +440,8 @@ public class Controller implements Initializable {
         // Controls the movement of the player
         keyPressed.addListener(((observableValue, aBoolean, t1) -> {
             if(!aBoolean){
+                movementTimer.start();
                 if (!missileFired) {
-                    movementTimer.start();
                     if(Boolean.FALSE.equals(sPressed.getValue())){
                         playerAnimationInvisible.startAnimation();
                     }
@@ -467,7 +450,6 @@ public class Controller implements Initializable {
                     }
                 }
                 else {
-                    movementTimer.start();
                     if(Boolean.FALSE.equals(sPressed.getValue())){
                         playerAnimationInvisible.stopAnimation();
                         playerAnimation.startAnimation();
@@ -479,29 +461,113 @@ public class Controller implements Initializable {
                 }
 
             } else {
+                movementTimer.stop();
                 if (!missileFired) {
-                    movementTimer.stop();
                     playerAnimationInvisible.playerIdle();
                 }
                 else {
-                    movementTimer.stop();
                     playerAnimation.stopAnimation();
                 }
             }
         }));
     }
 
-    private void removePowerUp(int i) {
-        missileBoxLocation.get(i).stop();
-        missileBoxLocation.remove(missileBoxLocation.get(i));
+    private void getPowerUp(PowerUpObject powerUpObject, int i) {
+        if (powerUpTypes.get(i) == 0) {
+            // Increase player missile
+            missileCounter += 10;
+            powerUpObject.loadMissileImages();
 
-        scene.getChildren().remove(missileBoxes.get(i));
-        missileBoxes.remove(missileBoxes.get(i));
+            missileBoard.setText(String.valueOf(missileCounter  + 1));
+        }
+        else if (powerUpTypes.get(i) == 1) {
+            // Increase player life
+            remainingLife += 500;
+            lifeBoard.setText(String.valueOf(remainingLife));
+        }
+        else {
+            // Increase playerScore
+            playerScore += 250;
+            scoreBoard.setText(String.valueOf(playerScore));
+        }
 
-        powerUpAnimations.get(i).stopAnimation();
-        powerUpAnimations.remove(powerUpAnimations.get(i));
+        powerUpObject.removePowerUp(i);
+    }
 
-        powerUpTypes.remove(powerUpTypes.get(i));
+    private boolean isGameOver() {
+        if (remainingLife == 0) {
+            return true;
+        }
+        else {
+            remainingLife--;
+            lifeBoard.setText(String.valueOf(remainingLife));
+        }
+
+        return false;
+    }
+
+    private void clearAllEnemies (PowerUpObject powerUpObject) {
+        // REMOVE ALL ASTEROIDS
+        asteroidsLocation.clear();
+        asteroidAnimations.clear();
+        scene.getChildren().removeAll(asteroids);
+        asteroids.clear();
+
+        // REMOVE ALL ENEMY ALIENS
+        enemyLocation.clear();
+        enemyStopping.clear();
+        scene.getChildren().removeAll(enemies);
+        enemies.clear();
+
+        // REMOVE ALL SPAWNED POWERUPS
+        powerUpLocations.clear();
+        powerUpTypes.clear();
+        powerUpAnimations.clear();
+        scene.getChildren().removeAll(powerUps);
+        powerUps.clear();
+
+        // REMOVE ALL SPAWNED MISSILES
+        scene.getChildren().removeAll(missiles);
+        missiles.clear();
+
+        translations.clear();
+    }
+
+    private void removeAsteroid(int k) {
+        asteroidsLocation.get(k).stop();
+        asteroidsLocation.remove(asteroidsLocation.get(k));
+
+        asteroidAnimations.get(k).stopAnimation();
+        asteroidAnimations.remove(asteroidAnimations.get(k));
+
+        scene.getChildren().remove(asteroids.get(k));
+        asteroids.remove(asteroids.get(k));
+    }
+
+    private void popUpResetButton (URL url, ResourceBundle resourceBundle) {
+        if (!popUpShowed) {
+            Stage primaryStage = new Stage();
+            final Stage dialog = new Stage();
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.initOwner(primaryStage);
+            VBox dialogVbox = new VBox(20);
+
+            Button btn = new Button("Reset");
+            dialogVbox.getChildren().add(btn);
+
+
+            Scene dialogScene = new Scene(dialogVbox, 300, 200);
+            dialog.setScene(dialogScene);
+            dialog.show();
+
+            btn.setOnAction(event -> {
+                initialize(url, resourceBundle);
+                dialog.close();
+
+            });
+
+            popUpShowed = true;
+        }
     }
 
 

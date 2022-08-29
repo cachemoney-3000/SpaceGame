@@ -17,12 +17,12 @@ import java.util.List;
 import java.util.Random;
 
 public class Enemy {
-    private ArrayList<ImageView> enemies;
-    private AnchorPane scene;
+    private final ArrayList<ImageView> enemies;
+    private final AnchorPane scene;
     private ImageView alien;
-    private ArrayList<PathTransition> enemyLocation;
-    private ArrayList<Boolean> outOfBounds;
-    private ArrayList<Timeline> enemyStopping;
+    private final ArrayList<PathTransition> enemyLocation;
+    private final ArrayList<Boolean> outOfBounds;
+    private final ArrayList<Timeline> enemyStopping;
     public Enemy (ImageView alien, AnchorPane scene){
         this.scene = scene;
         this.alien = alien;

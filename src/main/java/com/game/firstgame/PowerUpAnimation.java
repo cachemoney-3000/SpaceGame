@@ -11,12 +11,9 @@ import javafx.util.Duration;
 import java.util.ArrayList;
 
 public class PowerUpAnimation {
-    private ImageView runner;
-    private AnchorPane scene;
-    private int animationNumber;
-    private int powerUpType;
-
-    int number = 1;
+    private final ImageView runner;
+    private final int powerUpType;
+    private int number = 1;
 
     Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), event -> {
         animations();
@@ -102,9 +99,8 @@ public class PowerUpAnimation {
         }
     }
 
-    public PowerUpAnimation(AnchorPane scene, ImageView runner, int powerUpType) {
+    public PowerUpAnimation(ImageView runner, int powerUpType) {
         this.runner = runner;
-        this.scene = scene;
         this.runner.setFitHeight(25);
         this.runner.setFitWidth(25);
         this.powerUpType = powerUpType;

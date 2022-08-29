@@ -18,29 +18,29 @@
             <Image url="@images/Background.png" />
          </image>
       </ImageView>
-      <ImageView fx:id="player" fitHeight="92.0" fitWidth="55.0" layoutX="231.0" layoutY="658.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@images/Player/invisible/inv1.png" />
-         </image>
-      </ImageView>
-      <ImageView fitHeight="92.0" fitWidth="500.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fitHeight="92.0" fitWidth="500.0" layoutY="6.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@images/ScoreBoard/scoreBoardTop.png" />
          </image>
       </ImageView>
-      <Text fx:id="scoreBoard" fill="WHITE" layoutX="132.0" layoutY="32.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0" wrappingWidth="98.13671875">
+      <ImageView fitHeight="51.0" fitWidth="500.0" layoutX="20.0" layoutY="685.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@images/ScoreBoard/missileBoard.png" />
+         </image>
+      </ImageView>
+      <Text fx:id="scoreBoard" fill="WHITE" fontSmoothingType="LCD" layoutX="144.0" layoutY="42.0" strokeType="OUTSIDE" strokeWidth="0.0" text="012" wrappingWidth="98.13671875">
          <font>
-            <Font name="Arial Bold" size="20.0" />
+            <Font name="OCR A Extended" size="32.0" />
          </font>
       </Text>
-      <Text fx:id="lifeBoard" fill="WHITE" layoutX="376.0" layoutY="32.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0" wrappingWidth="98.13671875">
+      <Text fx:id="lifeBoard" fill="WHITE" fontSmoothingType="LCD" layoutX="390.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0" wrappingWidth="98.13671875">
          <font>
-            <Font name="Arial Bold" size="20.0" />
+            <Font name="OCR A Extended" size="32.0" />
          </font>
       </Text>
-      <Text fx:id="missileBoard" fill="WHITE" layoutX="14.0" layoutY="83.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0" wrappingWidth="98.13671875">
+      <Text fx:id="missileBoard" fill="WHITE" layoutX="47.0" layoutY="727.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0" wrappingWidth="98.13671875">
          <font>
-            <Font name="Arial Bold" size="20.0" />
+            <Font name="OCR A Extended" size="30.0" />
          </font>
       </Text>
    </children>

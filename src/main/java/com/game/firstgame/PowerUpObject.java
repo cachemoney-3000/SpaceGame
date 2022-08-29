@@ -10,6 +10,9 @@ import javafx.scene.shape.VLineTo;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.List;
+import java.util.List;
 import java.util.Random;
 
 public class PowerUpObject {
@@ -18,7 +21,7 @@ public class PowerUpObject {
     private final ArrayList<ImageView> missileBoxes;
     private final ArrayList<PathTransition> missileBoxLocation;
     private final ArrayList<PowerUpAnimation> powerUpAnimations;
-    private ArrayList <Integer> powerUpTypes;
+    private final ArrayList <Integer> powerUpTypes;
 
     public PowerUpObject (AnchorPane scene) {
         this.scene = scene;
@@ -50,7 +53,7 @@ public class PowerUpObject {
         missileBox.setX(randomPosition);
 
         int powerUpType = rand.nextInt(3);
-        PowerUpAnimation powerUpAnimation = new PowerUpAnimation(scene, missileBox, powerUpType);
+        PowerUpAnimation powerUpAnimation = new PowerUpAnimation(missileBox, powerUpType);
         powerUpAnimation.startAnimation();
         powerUpTypes.add(powerUpType);
 
@@ -64,7 +67,6 @@ public class PowerUpObject {
         path.getElements().add(new VLineTo(780));
 
         move.setDuration(Duration.seconds(8));
-        //move.setCycleCount(PathTransition.INDEFINITE);
         move.setPath(path);
 
         missileBoxLocation.add(move);
@@ -73,23 +75,37 @@ public class PowerUpObject {
         move.play();
     }
 
-    public ArrayList<ImageView> getMissileBoxes() {
+
+    public void removePowerUp(int i) {
+        missileBoxLocation.get(i).stop();
+        missileBoxLocation.remove(missileBoxLocation.get(i));
+
+        scene.getChildren().remove(missileBoxes.get(i));
+        missileBoxes.remove(missileBoxes.get(i));
+
+        powerUpAnimations.get(i).stopAnimation();
+        powerUpAnimations.remove(powerUpAnimations.get(i));
+
+        powerUpTypes.remove(powerUpTypes.get(i));
+    }
+
+    public List<ImageView> getMissileBoxes() {
         return missileBoxes;
     }
 
-    public ArrayList<ImageView> getMissiles() {
+    public List<ImageView> getMissiles() {
         return missiles;
     }
 
-    public ArrayList<PathTransition> getMissileBoxLocation() {
+    public List<PathTransition> getMissileBoxLocation() {
         return missileBoxLocation;
     }
 
-    public ArrayList<PowerUpAnimation> getPowerUpAnimations() {
+    public List<PowerUpAnimation> getPowerUpAnimations() {
         return powerUpAnimations;
     }
 
-    public ArrayList<Integer> getPowerUpTypes() {
+    public List<Integer> getPowerUpTypes() {
         return powerUpTypes;
     }
 }
