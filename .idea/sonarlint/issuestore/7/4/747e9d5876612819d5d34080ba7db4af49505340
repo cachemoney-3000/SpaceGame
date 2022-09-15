@@ -1,0 +1,38 @@
+
+h	java:S112Í"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ8§ªú€²0
+h	java:S112ø"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ8ú’ı€²0
+A
+java:S5411ß"*Use the primitive boolean expression here.(ò›ß˜
+q
+java:S1450B"[Remove the "asteroidBelt" field and declare it as a local variable in the relevant methods.(áÛÓï
+o
+java:S1450A"TRemove the "enemy" field and declare it as a local variable in the relevant methods.(»Œ­üÿÿÿÿ
+u
+java:S14508"ZRemove the "outOfBounds" field and declare it as a local variable in the relevant methods.(±¡‹Ïûÿÿÿÿ
+y
+java:S1450<"cRemove the "outOfBoundsAsteroids" field and declare it as a local variable in the relevant methods.(ÕğËô
+r
+java:S1450L"\Remove the "powerUpObject" field and declare it as a local variable in the relevant methods.(Ó“‘å
+Š
+java:S1130Ğ"lRemove the declaration of thrown exception 'java.io.IOException', as it cannot be thrown from method's body.(Ñ³¦¥8¾½²0
+X	java:S125Ø"<This block of commented-out lines of code should be removed.(ƒÛ†8€Ğû€²0
+q
+java:S3776³"SRefactor this method to reduce its Cognitive Complexity from 135 to the 15 allowed.(í›Ô8ñßí€²0
+u
+java:S3776û"RRefactor this method to reduce its Cognitive Complexity from 39 to the 15 allowed.(èƒÔ¿şÿÿÿÿ8ˆàí€²0
+p
+java:S3776Ü"RRefactor this method to reduce its Cognitive Complexity from 21 to the 15 allowed.(ÏÚá¶8”àí€²0
+U
+java:S1128	"3Remove this unused import 'javafx.fxml.FXMLLoader'.(À‡ô³úÿÿÿÿ8ÿ½²0
+K
+java:S1128".Remove this unused import 'javafx.scene.Node'.(ÑÖ¬ï8€¾²0
+M
+java:S1128"0Remove this unused import 'javafx.scene.Parent'.(²ä¡È8€¾²0
+W
+java:S1128"5Remove this unused import 'javafx.scene.layout.Pane'.(êÄƒÄşÿÿÿÿ8¾²0
+Q
+java:S1128"/Remove this unused import 'javafx.stage.Popup'.(›Ü…Èÿÿÿÿÿ8¾²0
+J
+java:S10688"/Remove this unused "outOfBounds" private field.(±¡‹Ïûÿÿÿÿ
+N
+java:S1068<"8Remove this unused "outOfBoundsAsteroids" private field.(ÕğËô

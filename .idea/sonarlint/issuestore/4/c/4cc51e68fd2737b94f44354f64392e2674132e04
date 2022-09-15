@@ -1,0 +1,8 @@
+
+‹
+java:S4165"pRemove this useless assignment; "parallelTransition" already holds the assigned value along all execution paths.(ÏË†ùÿÿÿÿ
+v	java:S116"\Rename this field "BACKGROUND_HEIGHT" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(âäÅ†şÿÿÿÿ
+J
+java:S1656"/Remove or correct this useless self-assignment.(ÏË†ùÿÿÿÿ
+K
+java:S1128"5Remove this unused import 'javafx.scene.image.Image'.(‰¿½Ç

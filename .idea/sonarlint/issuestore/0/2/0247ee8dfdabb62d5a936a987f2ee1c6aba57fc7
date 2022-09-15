@@ -1,0 +1,9 @@
+
+G
+java:S1602",Remove useless curly braces around statement(²ÆÕ€ùÿÿÿÿ
+g
+java:S3776"RRefactor this method to reduce its Cognitive Complexity from 24 to the 15 allowed.(ÿËg
+Q
+java:S1128";Remove this unused import 'javafx.scene.layout.AnchorPane'.(Ø µ
+F
+java:S1128"0Remove this unused import 'java.util.ArrayList'.(÷‰îƒ

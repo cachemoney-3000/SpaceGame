@@ -6,8 +6,11 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
@@ -23,6 +26,7 @@ import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -201,12 +205,16 @@ public class Controller implements Initializable {
         asteroids.remove(asteroids.get(k));
     }
 
-    private void popUpResetButton () {
+    private void popUpResetButton () throws IOException {
         if (!popUpShowed) {
+
             Stage popUpStage = new Stage();
             final Stage dialog = new Stage();
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.initOwner(popUpStage);
+
+            //FXMLLoader loader = new FXMLLoader(getClass().getResource());
+
             VBox dialogVbox = new VBox(20);
 
             Button btn = new Button("Reset");
@@ -217,13 +225,14 @@ public class Controller implements Initializable {
             dialog.setScene(dialogScene);
             dialog.show();
 
+
             btn.setOnAction(event -> {
                 dialog.close();
                 popUpStage.close();
                 spawnPlayer();
                 populateTheCounters();
-                movementTimer.start();
             });
+
 
             popUpShowed = true;
         }
@@ -318,7 +327,11 @@ public class Controller implements Initializable {
                         // Check if the player was hit by an alien
                         if (playerBounds.intersects(enemyBounds) && playerLocationY > alienLocationMinY && isGameOver()) {
                             cleanUp();
-                            popUpResetButton();
+                            try {
+                                popUpResetButton();
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                         // If an alien went past the screen, spawn new enemy
                         if (Boolean.TRUE.equals(alienLocationMaxY > 760)) {
@@ -357,7 +370,11 @@ public class Controller implements Initializable {
                         // Check if the asteroid hits the player
                         if (playerBounds.intersects(asteroidBounds) && playerLocationY > asteroidLocationMinY && isGameOver()) {
                             cleanUp();
-                            popUpResetButton();
+                            try {
+                                popUpResetButton();
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
 
 
